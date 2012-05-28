@@ -1010,6 +1010,17 @@ class B2World
 				continue;
 			}
 			
+			//STENCYL
+			if(!seed.isActive() && !seed.isAlwaysActive() && (seed.m_xf.position.x >= m_aabb.lowerBound.x ||
+									 seed.m_xf.position.y >= m_aabb.lowerBound.y ||
+									 seed.m_xf.position.x <= m_aabb.upperBound.x ||
+									 seed.m_xf.position.y <= m_aabb.upperBound.y))
+			{
+				seed.setActive(true);
+				seed.setAwake(true);
+			}
+			//END STENCYL
+			
 			if (seed.isAwake() == false || seed.isActive() == false)
 			{
 				seed = seed.m_next;
@@ -1022,6 +1033,20 @@ class B2World
 				seed = seed.m_next;
 				continue;
 			}
+			
+			//STENCYL
+			if(seed.isActive() && !seed.isAlwaysActive() && (seed.m_xf.position.x <= m_aabb.lowerBound.x ||
+									seed.m_xf.position.y <= m_aabb.lowerBound.y ||
+									seed.m_xf.position.x >= m_aabb.upperBound.x ||
+									seed.m_xf.position.y >= m_aabb.upperBound.y))
+			{
+				seed.setAwake(false);
+				seed.setActive(false);
+				
+				seed = seed.m_next;
+				continue;
+			}
+			//END STENCYL
 			
 			// Reset island and stack.
 			island.clear();
