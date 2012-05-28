@@ -1147,6 +1147,75 @@ class B2Body
 	{
 		return m_world;
 	}
+	
+	//STENCYL
+	public function setFriction(friction:Float)
+	{
+		var fixture = m_fixtureList;
+		
+		while(fixture != null)
+		{
+			fixture.m_friction = friction;
+			fixture = fixture.m_next;
+		} 
+	}
+	
+	public function setBounciness(bounciness:Float)
+	{
+		var fixture = m_fixtureList;
+		
+		while(fixture != null)
+		{
+			fixture.m_restitution = bounciness;
+			fixture = fixture.m_next;
+		} 
+	}
+	
+	public function setPaused(flag:Bool) 
+	{
+		if(flag) 
+		{
+			m_flags |= e_pausedFlag;
+		}
+		
+		else 
+		{
+			m_flags &= ~e_pausedFlag;
+		}
+	}
+	
+	public function isPaused():Bool
+	{
+		return (m_flags & e_pausedFlag) == e_pausedFlag;
+	}
+	
+	public function setIgnoreGravity(flag:Bool) {
+		if(flag) {
+			m_flags |= e_ignoreGravityFlag;
+		}
+		else {
+			m_flags &= ~e_ignoreGravityFlag;
+		}
+	}
+	
+	public function isIgnoringGravity():Bool {
+		return (m_flags & e_ignoreGravityFlag) == e_ignoreGravityFlag;
+	}
+	
+	public function setAlwaysActive(flag:Bool) {
+		if(flag) {
+			m_flags |= e_alwaysActiveFlag;
+		}
+		else {
+			m_flags &= ~e_alwaysActiveFlag;
+		}
+	}
+	
+	public function isAlwaysActive():Bool {
+		return (m_flags & e_alwaysActiveFlag) == e_alwaysActiveFlag;
+	}
+		
+	//END STENCYL
 
 	//--------------- Internals Below -------------------
 
@@ -1258,6 +1327,9 @@ class B2Body
 		
 		m_fixtureList = null;
 		m_fixtureCount = 0;
+		
+		//STENCYL
+		groupID = bd.groupID;
 	}
 	
 	// Destructor
@@ -1368,6 +1440,9 @@ class B2Body
 
 	private var m_userData:Dynamic;
 	
+	//STENCYL
+	public var groupID:Int;
+	
 	
 	// m_flags
 	//enum
@@ -1378,6 +1453,10 @@ class B2Body
 		static public var e_bulletFlag:Int			= 0x0008;
 		static public var e_fixedRotationFlag:Int	= 0x0010;
 		static public var e_activeFlag:Int			= 0x0020;
+		//STENCYL
+		static public var e_ignoreGravityFlag:Int   = 0x0080;
+		static public var e_alwaysActiveFlag:Int    = 0x0100;
+		static public var e_pausedFlag:Int          = 0x0200;
 	//};
 
 	// m_type

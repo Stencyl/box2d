@@ -22,6 +22,10 @@ package box2D.dynamics;
 import box2D.collision.B2Manifold;
 import box2D.dynamics.contacts.B2Contact;
 
+import com.stencyl.models.Actor;
+import com.stencyl.models.Region;
+import com.stencyl.models.Terrain;
+
 
 /**
  * Implement this class to get contact information. You can use these results for
@@ -46,12 +50,102 @@ class B2ContactListener
 	/**
 	 * Called when two fixtures begin to touch.
 	 */
-	public function beginContact(contact:B2Contact):Void { }
+	public function beginContact(contact:B2Contact):Void 
+	{
+		var time = nme.Lib.getTimer();
+		contact.key = time;
+
+		var a1 = cast(contact.getFixtureA().getUserData(), Actor);
+		var a2 = cast(contact.getFixtureB().getUserData(), Actor);
+		
+		var r1 = Std.is(a1, Region);
+		var r2 = Std.is(a2, Region);
+		
+		if(r1 && !(r2 || Std.is(a2, Terrain)))
+		{
+			cast(a1, Region).addActor(a2);
+			a2.addRegionContact(contact);
+			return;
+		}
+		
+		if(r2 && !(r1 || Std.is(a1, Terrain)))
+		{
+			cast(a2, Region).addActor(a1);
+			a1.addRegionContact(contact);
+			return;
+		}
+		
+		a1.addContact(contact);
+		a2.addContact(contact);
+	}
 
 	/**
 	 * Called when two fixtures cease to touch.
 	 */
-	public function endContact(contact:B2Contact):Void { }
+	public function endContact(contact:B2Contact):Void 
+	{ 
+		var a1 = cast(contact.getFixtureA().getUserData(), Actor);
+		var a2 = cast(contact.getFixtureB().getUserData(), Actor);
+			
+		var r1 = Std.is(a1, Region);
+		var r2 = Std.is(a2, Region);
+			
+		if(r1 && !r2)
+		{
+			var inRegion = false;
+			
+			a2.removeRegionContact(contact);
+			
+			for(p in a2.regionContacts)
+			{
+				if(Std.is(p.getFixtureA().getUserData(), Region) && p.getFixtureA().getUserData() == a1)
+				{
+					inRegion = true;
+					break;
+				}
+				
+				if(Std.is(p.getFixtureB().getUserData(), Region) && p.getFixtureB().getUserData() == a1)
+				{
+					inRegion = true;
+					break;
+				}
+			}
+			
+			if(!inRegion || a2.recycled) cast(a1, Region).removeActor(a2);
+
+			return;
+		}
+		
+		if(r2 && !r1)
+		{
+			var inRegion = false;
+			
+			a1.removeRegionContact(contact);
+			
+			for(p in a1.regionContacts)
+			{
+				if(Std.is(p.getFixtureA().getUserData(), Region) && p.getFixtureA().getUserData() == a2)
+				{
+					inRegion = true;
+					break;
+				}
+				
+				if(Std.is(p.getFixtureB().getUserData(), Region) && p.getFixtureB().getUserData() == a2)
+				{
+					inRegion = true;
+					break;
+				}
+			}
+			
+			if(!inRegion || a1.recycled) cast(a2, Region).removeActor(a1);
+
+			return;
+		}
+		
+		a1.removeContact(contact);
+		a2.removeContact(contact);
+	}
+		
 
 	/**
 	 * This is called after a contact is updated. This allows you to inspect a

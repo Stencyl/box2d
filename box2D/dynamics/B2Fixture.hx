@@ -272,6 +272,8 @@ class B2Fixture
 		
 		m_friction = 0.0;
 		m_restitution = 0.0;
+		
+		groupID = 3;
 	}
 	
 	/**
@@ -294,6 +296,9 @@ class B2Fixture
 		m_shape = def.shape.copy();
 		
 		m_density = def.density;
+		
+		//STENCYL
+		groupID = def.groupID;
 	}
 	
 	/**
@@ -367,4 +372,7 @@ class B2Fixture
 	public var m_isSensor:Bool;
 	
 	public var m_userData:Dynamic;
+	
+	//STENCYL
+	public var groupID:Int;
 }

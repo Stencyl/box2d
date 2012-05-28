@@ -337,6 +337,13 @@ class B2EdgeShape extends B2Shape
 	
 	//--------------- Internals Below -------------------
 
+	override public function copy():B2Shape 
+	{
+		var s:B2Shape = new B2EdgeShape(m_v1, m_v2);
+		s.set(this);
+		return s;
+	}
+
 	/**
 	* @private
 	*/

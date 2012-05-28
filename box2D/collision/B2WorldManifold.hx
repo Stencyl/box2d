@@ -174,6 +174,19 @@ class B2WorldManifold
 			
 		}
 	}
+	
+	/**
+		 * If there are more than one contact points, this getter will return the average.
+		 */
+		public function getPoint():B2Vec2 {
+			if(m_points.length == 0) {
+				return null;
+			}
+			if(m_points.length == 1) {
+				return m_points[0];
+			}
+			return new B2Vec2((m_points[0].x + m_points[1].x) / 2, (m_points[0].y + m_points[1].y) / 2);
+		}	
 
 	/**
 	 * world vector pointing from A to B

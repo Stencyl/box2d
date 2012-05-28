@@ -43,6 +43,9 @@ class B2FixtureDef
 		filter.maskBits = 0xFFFF;
 		filter.groupIndex = 0;
 		isSensor = false;
+		
+		//STENCYL
+		groupID = 3;
 	}
 	
 	/**
@@ -81,4 +84,7 @@ class B2FixtureDef
 	 * Contact filtering data.
 	 */
 	public var filter:B2FilterData;
+	
+	//STENCYL
+	public var groupID:Int;
 }

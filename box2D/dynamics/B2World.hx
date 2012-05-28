@@ -77,7 +77,7 @@ class B2World
 		m_controllerCount = 0;
 		
 		m_warmStarting = true;
-		m_continuousPhysics = true;
+		m_continuousPhysics = false;
 		
 		m_allowSleep = doSleep;
 		m_gravity = gravity;
@@ -638,7 +638,6 @@ class B2World
 	 * Call this to draw shapes and other debug draw data.
 	 */
 	public function drawDebugData() : Void{
-		
 		if (m_debugDraw == null)
 		{
 			return;
@@ -1636,6 +1635,18 @@ class B2World
 		}
 	}
 	
+	//STENCYL
+	public var m_aabb:B2AABB;
+	
+	public function setScreenBounds(bounds:B2AABB) {
+		m_aabb = bounds;
+	}
+	
+	public function getScreenBounds():B2AABB {
+		return m_aabb;
+	}
+	//END STENCYL
+	
 	public var m_flags:Int;
 
 	public var m_contactManager:B2ContactManager;
@@ -1656,8 +1667,8 @@ class B2World
 	private var m_controllerList:B2Controller;
 	private var m_controllerCount:Int;
 
-	private var m_gravity:B2Vec2;
-	private var m_allowSleep:Bool;
+	public var m_gravity:B2Vec2;
+	public var m_allowSleep:Bool;
 
 	public var m_groundBody:B2Body;
 
@@ -1668,10 +1679,10 @@ class B2World
 	private var m_inv_dt0:Float;
 
 	// This is for debugging the solver.
-	static private var m_warmStarting:Bool;
+	static public var m_warmStarting:Bool = true;
 
 	// This is for debugging the solver.
-	static private var m_continuousPhysics:Bool;
+	static public var m_continuousPhysics:Bool = false;
 	
 	// m_flags
 	public static var e_newFixture:Int = 0x0001;

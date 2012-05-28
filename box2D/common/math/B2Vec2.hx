@@ -127,6 +127,20 @@ class B2Vec2
 		
 		return length;
 	}
+	
+	public function perpDot(b:B2Vec2):Float {
+		return -y * b.x + x * b.y;
+	}
+	
+	public function winding(b:B2Vec2, c:B2Vec2):Float {
+		var clone = b.copy();
+		clone.subtract(this);
+		
+		var clone2 = c.copy();
+		clone2.subtract(b);
+		
+		return clone.perpDot(clone2); // < 0 = right > 0 = left
+	}
 
 	public function isValid():Bool
 	{

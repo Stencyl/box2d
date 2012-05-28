@@ -50,6 +50,9 @@ class B2BodyDef
 		type = B2Body.b2_staticBody;
 		active = true;
 		inertiaScale = 1.0;
+		
+		//STENCYL
+		groupID = 3;
 	}
 
 	/** The body type: static, kinematic, or dynamic. A member of the b2BodyType class
@@ -134,4 +137,13 @@ class B2BodyDef
 	 * @warning Experimental
 	 */
 	public var inertiaScale:Float;
+	
+	
+	//STENCYL: We store these globally
+	public var groupID:Int;
+	public var ignoreGravity:Bool;
+	public var friction:Float;
+	public var bounciness:Float;
+	public var mass:Float;
+	public var aMass:Float;
 }

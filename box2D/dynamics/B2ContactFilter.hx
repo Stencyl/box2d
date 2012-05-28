@@ -34,16 +34,34 @@ class B2ContactFilter
 	* @warning for performance reasons this is only called when the AABBs begin to overlap.
 	*/
 	public function shouldCollide(fixtureA:B2Fixture, fixtureB:B2Fixture) : Bool {
-		var filter1:B2FilterData = fixtureA.getFilterData();
-		var filter2:B2FilterData = fixtureB.getFilterData();
+		var g1 = fixtureA.m_body.groupID;
+		var g2 = fixtureB.m_body.groupID;
 		
-		if (filter1.groupIndex == filter2.groupIndex && filter1.groupIndex != 0)
+		var gf1 = fixtureA.groupID;
+		var gf2 = fixtureB.groupID;
+		
+		if(gf1 != -1000)
 		{
-			return filter1.groupIndex > 0;
+			g1 = gf1;
 		}
 		
-		var collide:Bool = (filter1.maskBits & filter2.categoryBits) != 0 && (filter1.categoryBits & filter2.maskBits) != 0;
-		return collide;
+		if(gf2 != -1000)
+		{
+			g2 = gf2;
+		}
+		
+		if(g1 == -1 || g2 == -1)
+		{
+			return false;
+		}
+		
+		//REGION ID
+		if(g1 == -2 || g2 == -2)
+		{
+			return true;
+		}
+		
+		return com.stencyl.models.GameModel.collisionMap[g1][g2];
 	}
 	
 	/**
