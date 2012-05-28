@@ -1264,6 +1264,12 @@ class B2Body
 			m_flags |= e_activeFlag;
 		}
 		
+		//STENCYL
+		if (bd.ignoreGravity)
+		{
+			m_flags |= e_ignoreGravityFlag;
+		}
+		
 		m_world = world;
 		
 		m_xf.position.setV(bd.position);
