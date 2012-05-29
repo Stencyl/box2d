@@ -34,9 +34,9 @@ import box2D.dynamics.B2Body;
  */
 class B2LineJointDef extends B2JointDef
 {
-	public function b2LineJointDef()
+	public function new()
 	{
-		
+		super ();
 		localAnchorA = new B2Vec2();
 		localAnchorB = new B2Vec2();
 		localAxisA = new B2Vec2();
