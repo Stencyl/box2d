@@ -59,4 +59,12 @@ class B2JointDef
 	*/
 	public var collideConnected:Bool;
 	
+	
+	//Stencyl
+	public static var CENTER:String = "center";
+	
+	public var ID:Int;
+	public var actor1:Int;
+	public var actor2:Int;
+	
 }
