@@ -376,5 +376,7 @@ class B2Contact
 	public var m_oldManifold:B2Manifold;
 	
 	public var m_toi:Float;
+	
+	//STENCYL
 	public var key:Int;
 }
