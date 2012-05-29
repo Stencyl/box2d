@@ -284,4 +284,6 @@ class B2Joint
 	static public var e_atUpperLimit:Int = 2;
 	static public var e_equalLimits:Int = 3;
 	
+	//Stencyl
+	public var ID:Int;
 }
