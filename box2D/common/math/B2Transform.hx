@@ -37,8 +37,7 @@ class B2Transform
 		if (pos != null) {
 			
 			position.setV(pos);
-			R.setM(r);
-			
+			R.setM(r);			
 		}
 		
 	}
@@ -75,6 +74,13 @@ class B2Transform
 	public function getAngle():Float
 	{
 		return Math.atan2(R.col1.y, R.col1.x);
+	}
+	
+	public function multiply(v:B2Vec2):B2Vec2
+	{
+		var v2:B2Vec2 = R.multiplyV(v);
+		v2.add(position);
+		return v2;
 	}
 	 
 

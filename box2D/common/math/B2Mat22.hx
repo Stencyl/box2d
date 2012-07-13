@@ -78,6 +78,15 @@ class B2Mat22
 		col2.y += m.col2.y;
 	}
 	
+	public function multiplyV(v:B2Vec2):B2Vec2
+	{
+		return new B2Vec2
+		(
+			col1.x * v.x + col2.x * v.y, 
+			col1.y * v.x + col2.y * v.y
+		);
+	}
+	
 	public function setIdentity() : Void
 	{
 		col1.x = 1.0; col2.x = 0.0;
@@ -88,6 +97,14 @@ class B2Mat22
 	{
 		col1.x = 0.0; col2.x = 0.0;
 		col1.y = 0.0; col2.y = 0.0;
+	}
+	
+	public function setAngle(n:Float) : Void 
+	{
+		col1.x = Math.cos(n);
+		col1.y = Math.sin(n);
+		col2.x = -col1.y;
+		col2.y = col1.x;
 	}
 	
 	public function getAngle() :Float
