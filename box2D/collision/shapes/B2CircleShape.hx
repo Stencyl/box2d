@@ -158,7 +158,7 @@ class B2CircleShape extends B2Shape
 			xf:B2Transform,
 			c:B2Vec2):Float
 	{
-		var p:B2Vec2 = B2Math.mulX(xf, m_p);
+		var p:B2Vec2 = B2Math.mulX(xf, m_p, true);
 		var l:Float = -(B2Math.dot(normal, p) - offset);
 		
 		if (l < -m_radius + B2Math.MIN_VALUE)

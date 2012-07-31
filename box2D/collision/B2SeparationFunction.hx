@@ -158,14 +158,14 @@ class B2SeparationFunction
 			localPointB1 = m_proxyB.getVertex(cache.indexB[0]);
 			localPointB2 = m_proxyB.getVertex(cache.indexB[1]);
 			
-			var pA:B2Vec2 = B2Math.mulX(transformA, localPointA);
-			var dA:B2Vec2 = B2Math.mulMV(transformA.R, B2Math.subtractVV(localPointA2, localPointA1));
-			var pB:B2Vec2 = B2Math.mulX(transformB, localPointB);
-			var dB:B2Vec2 = B2Math.mulMV(transformB.R, B2Math.subtractVV(localPointB2, localPointB1));
+			var pA:B2Vec2 = B2Math.mulX(transformA, localPointA, true);
+			var dA:B2Vec2 = B2Math.mulMV(transformA.R, B2Math.subtractVV(localPointA2, localPointA1, true), true);
+			var pB:B2Vec2 = B2Math.mulX(transformB, localPointB, true);
+			var dB:B2Vec2 = B2Math.mulMV(transformB.R, B2Math.subtractVV(localPointB2, localPointB1, true), true);
 			
 			var a:Float = dA.x * dA.x + dA.y * dA.y;
 			var e:Float = dB.x * dB.x + dB.y * dB.y;
-			var r:B2Vec2 = B2Math.subtractVV(dB, dA);
+			var r:B2Vec2 = B2Math.subtractVV(dB, dA, true);
 			var c:Float = dA.x * r.x + dA.y * r.y;
 			var f:Float = dB.x * r.x + dB.y * r.y;
 			
@@ -276,8 +276,8 @@ class B2SeparationFunction
 				axisB = B2Math.mulTMV(transformB.R, m_axis.getNegative());
 				localPointA = m_proxyA.getSupportVertex(axisA);
 				localPointB = m_proxyB.getSupportVertex(axisB);
-				pointA = B2Math.mulX(transformA, localPointA);
-				pointB = B2Math.mulX(transformB, localPointB);
+				pointA = B2Math.mulX(transformA, localPointA, true);
+				pointB = B2Math.mulX(transformB, localPointB, true);
 				//float32 separation = b2Dot(pointB - pointA, m_axis);
 				seperation = (pointB.x - pointA.x) * m_axis.x + (pointB.y - pointA.y) * m_axis.y;
 				return seperation;
@@ -285,12 +285,12 @@ class B2SeparationFunction
 			case e_faceA:
 			{
 				normal = B2Math.mulMV(transformA.R, m_axis);
-				pointA = B2Math.mulX(transformA, m_localPoint);
+				pointA = B2Math.mulX(transformA, m_localPoint, true);
 				
 				axisB = B2Math.mulTMV(transformB.R, normal.getNegative());
 				
 				localPointB = m_proxyB.getSupportVertex(axisB);
-				pointB = B2Math.mulX(transformB, localPointB);
+				pointB = B2Math.mulX(transformB, localPointB, true);
 				
 				//float32 separation = b2Dot(pointB - pointA, normal);
 				seperation = (pointB.x - pointA.x) * normal.x + (pointB.y - pointA.y) * normal.y;
@@ -299,12 +299,12 @@ class B2SeparationFunction
 			case e_faceB:
 			{
 				normal = B2Math.mulMV(transformB.R, m_axis);
-				pointB = B2Math.mulX(transformB, m_localPoint);
+				pointB = B2Math.mulX(transformB, m_localPoint, true);
 				
 				axisA = B2Math.mulTMV(transformA.R, normal.getNegative());
 				
 				localPointA = m_proxyA.getSupportVertex(axisA);
-				pointA = B2Math.mulX(transformA, localPointA);
+				pointA = B2Math.mulX(transformA, localPointA, true);
 				
 				//float32 separation = b2Dot(pointA - pointB, normal);
 				seperation = (pointA.x - pointB.x) * normal.x + (pointA.y - pointB.y) * normal.y;

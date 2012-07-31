@@ -134,9 +134,9 @@ public static function distance(output:B2DistanceOutput, cache:B2SimplexCache, i
 		
 		// Compute a tentative new simplex vertex using support points
 		var vertex:B2SimplexVertex = vertices[simplex.m_count];
-		vertex.indexA = Std.int (proxyA.getSupport(B2Math.mulTMV(transformA.R, d.getNegative())));
+		vertex.indexA = Std.int (proxyA.getSupport(B2Math.mulTMV(transformA.R, d.getNegative(), true)));
 		vertex.wA = B2Math.mulX(transformA, proxyA.getVertex(vertex.indexA));
-		vertex.indexB = Std.int (proxyB.getSupport(B2Math.mulTMV(transformB.R, d)));
+		vertex.indexB = Std.int (proxyB.getSupport(B2Math.mulTMV(transformB.R, d, true)));
 		vertex.wB = B2Math.mulX(transformB, proxyB.getVertex(vertex.indexB));
 		vertex.w = B2Math.subtractVV(vertex.wB, vertex.wA);
 		
@@ -186,7 +186,7 @@ public static function distance(output:B2DistanceOutput, cache:B2SimplexCache, i
 			// Shapes are still not overlapped.
 			// Move the witness points to the outer surface.
 			output.distance -= rA + rB;
-			var normal:B2Vec2 = B2Math.subtractVV(output.pointB, output.pointA);
+			var normal:B2Vec2 = B2Math.subtractVV(output.pointB, output.pointA, true);
 			normal.normalize();
 			output.pointA.x += rA * normal.x;
 			output.pointA.y += rA * normal.y;

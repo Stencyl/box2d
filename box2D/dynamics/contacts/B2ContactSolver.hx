@@ -60,10 +60,12 @@ class B2ContactSolver
 		
 		m_constraintCount = contactCount;
 
+		B2ContactConstraint.freePool(); //POOLING
+		
 		// fill vector to hold enough constraints
 		while (m_constraints.length < m_constraintCount)
 		{
-			m_constraints[m_constraints.length] = new B2ContactConstraint();
+			m_constraints[m_constraints.length] = B2ContactConstraint.getFromPool(); //POOLING
 		}
 		
 		for (i in 0...contactCount)

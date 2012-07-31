@@ -36,6 +36,18 @@ class B2ContactConstraintPoint
 		
 	}
 	
+	public function reset() {
+		localPoint.set( 0, 0 );// = new B2Vec2();
+		rA.set( 0, 0 );// = new B2Vec2();
+		rB.set( 0, 0 ); //= new B2Vec2();
+		normalImpulse = 0.0;
+		tangentImpulse = 0.0;
+		normalMass = 0.0;
+		tangentMass = 0.0;
+		equalizedMass = 0.0;
+		velocityBias = 0.0;
+	}
+	
 	public var localPoint:B2Vec2;
 	public var rA:B2Vec2;
 	public var rB:B2Vec2;

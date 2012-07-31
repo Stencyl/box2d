@@ -110,7 +110,7 @@ class B2PolygonShape extends B2Shape
 		{
 			var i1:Int = i;
 			var i2:Int = i + 1 < m_vertexCount ? i + 1 : 0;
-			var edge:B2Vec2 = B2Math.subtractVV(m_vertices[i2], m_vertices[i1]);
+			var edge:B2Vec2 = B2Math.subtractVV(m_vertices[i2], m_vertices[i1], true);
 			B2Settings.b2Assert(edge.lengthSquared() > B2Math.MIN_VALUE /* * Number.MIN_VALUE*/);
 			m_normals[i].setV(B2Math.crossVF(edge, 1.0));
 			m_normals[i].normalize();
@@ -515,7 +515,7 @@ class B2PolygonShape extends B2Shape
 			c:B2Vec2):Float
 	{
 		// Transform plane into shape co-ordinates
-		var normalL:B2Vec2 = B2Math.mulTMV(xf.R, normal);
+		var normalL:B2Vec2 = B2Math.mulTMV(xf.R, normal, true);
 		var offsetL:Float = offset - B2Math.dot(normal, xf.position);
 		
 		var depths:Array <Float> = new Array <Float>();

@@ -293,6 +293,28 @@ class B2Body
 		m_world.m_contactManager.findNewContacts();
 	}
 	
+	//just for tweening
+	public function setPositionFast(position:B2Vec2) : Void
+	{
+		if(m_world.isLocked() == true)
+		{
+			return;
+		}
+		
+		m_xf.position.setV(position);
+		
+		var tMat:B2Mat22 = m_xf.R;
+		var tVec:B2Vec2 = m_sweep.localCenter;
+
+		m_sweep.c.x = (tMat.col1.x * tVec.x + tMat.col2.x * tVec.y);
+		m_sweep.c.y = (tMat.col1.y * tVec.x + tMat.col2.y * tVec.y);
+
+		m_sweep.c.x += m_xf.position.x;
+		m_sweep.c.y += m_xf.position.y;
+
+		m_sweep.c0.setV(m_sweep.c);
+	}
+	
 	/**
 	 * Set the position of the body's origin and rotation (radians).
 	 * This breaks any contacts and wakes the other bodies.
