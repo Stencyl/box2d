@@ -39,8 +39,22 @@ class B2Vec2
 		return new B2Vec2(x_, y_);
 	}
 	
-	public function copy():B2Vec2{
-		return new B2Vec2(x,y);
+	public function copy(fromPool:Bool = false):B2Vec2
+	{
+		var vec:B2Vec2;
+		
+		if(fromPool) 
+		{
+			vec = getFromPool();
+			vec.set(x, y);
+		} 
+		
+		else 
+		{	
+			vec = new B2Vec2(x, y);
+		}
+			
+		return vec;
 	}
 	
 	public function add(v:B2Vec2) : Void
@@ -149,4 +163,51 @@ class B2Vec2
 
 	public var x:Float;
 	public var y:Float;
+	
+	//POOLING
+	public var poolStale:Bool;
+	
+	public function reset() 
+	{
+		x = 0;
+		y = 0;			
+	}
+	
+	public static var pool:Array<B2Vec2> = new Array<B2Vec2>();
+	public static var pooli:Int;
+	
+	public static function freePool() 
+	{
+		pooli = 0;
+	}
+
+	public static var poolOverride:B2Vec2;
+	
+	public static function getFromPool():B2Vec2 
+	{
+		if(poolOverride != null) 
+		{	
+			var po:B2Vec2 = poolOverride;
+			po.poolStale = false;
+			poolOverride = null;
+			return po;	
+		}
+		
+		if(pooli < pool.length)
+		{
+			var contact:B2Vec2 = pool[pooli];
+			contact.x = 0;
+			contact.y = 0;
+			pooli++;
+			return contact;
+		} 
+		
+		else 
+		{	
+			var contact:B2Vec2 = new B2Vec2();
+			pool.push( contact );
+			pooli++;
+			return contact;
+		}
+	}
 }

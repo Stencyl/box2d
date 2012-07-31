@@ -68,9 +68,21 @@ class B2Math {
 		return a.x * b.y - a.y * b.x;
 	}
 
-	static public function crossVF(a:B2Vec2, s:Float):B2Vec2
+	static public function crossVF(a:B2Vec2, s:Float, fromPool:Bool = false):B2Vec2
 	{
-		var v:B2Vec2 = new B2Vec2(s * a.y, -s * a.x);
+		var v:B2Vec2;
+		
+		if(fromPool) 
+		{
+			v = B2Vec2.getFromPool();
+			v.set(s * a.y, -s * a.x);	
+		} 
+		
+		else 
+		{	
+			v = new B2Vec2(s * a.y, -s * a.x);
+		}
+		
 		return v;
 	}
 
@@ -80,37 +92,55 @@ class B2Math {
 		return v;
 	}
 
-	static public function mulMV(A:B2Mat22, v:B2Vec2):B2Vec2
+	static public function mulMV(A:B2Mat22, v:B2Vec2, fromPool:Bool = false):B2Vec2
 	{
-		// (tMat.col1.x * tVec.x + tMat.col2.x * tVec.y)
-		// (tMat.col1.y * tVec.x + tMat.col2.y * tVec.y)
-		var u:B2Vec2 = new B2Vec2(A.col1.x * v.x + A.col2.x * v.y, A.col1.y * v.x + A.col2.y * v.y);
-		return u;
+		var vec:B2Vec2;
+		
+		if(fromPool) 
+		{
+			vec = B2Vec2.getFromPool();
+			vec.set(A.col1.x * v.x + A.col2.x * v.y, A.col1.y * v.x + A.col2.y * v.y);
+		} 
+		
+		else 
+		{
+			vec = new B2Vec2(A.col1.x * v.x + A.col2.x * v.y, A.col1.y * v.x + A.col2.y * v.y);
+		}
+
+		return vec;
 	}
 
-	static public function mulTMV(A:B2Mat22, v:B2Vec2):B2Vec2
+	static public function mulTMV(A:B2Mat22, v:B2Vec2, fromPool:Bool = false):B2Vec2
 	{
-		// (tVec.x * tMat.col1.x + tVec.y * tMat.col1.y)
-		// (tVec.x * tMat.col2.x + tVec.y * tMat.col2.y)
-		var u:B2Vec2 = new B2Vec2(dot(v, A.col1), dot(v, A.col2));
-		return u;
+		var vec:B2Vec2;
+		
+		if(fromPool) 
+		{
+			vec = B2Vec2.getFromPool();
+			vec.set(dot(v, A.col1), dot(v, A.col2));
+		} 
+		
+		else 
+		{	
+			vec = new B2Vec2(dot(v, A.col1), dot(v, A.col2));
+		}
+
+		return vec;
 	}
 	
-	static public function mulX(T:B2Transform, v:B2Vec2) : B2Vec2
+	static public function mulX(T:B2Transform, v:B2Vec2, fromPool:Bool = false):B2Vec2
 	{
-		var a:B2Vec2 = mulMV(T.R, v);
+		var a:B2Vec2 = mulMV(T.R, v, fromPool);
 		a.x += T.position.x;
 		a.y += T.position.y;
-		//return T.position + b2Mul(T.R, v);
 		return a;
 	}
 
-	static public function mulXT(T:B2Transform, v:B2Vec2):B2Vec2
+	static public function mulXT(T:B2Transform, v:B2Vec2, fromPool:Bool = false):B2Vec2
 	{
-		var a:B2Vec2 = subtractVV(v, T.position);
-		//return b2MulT(T.R, v - T.position);
-		var tX:Float = (a.x * T.R.col1.x + a.y * T.R.col1.y );
-		a.y = (a.x * T.R.col2.x + a.y * T.R.col2.y );
+		var a:B2Vec2 = subtractVV(v, T.position, fromPool);
+		var tX:Float = (a.x * T.R.col1.x + a.y * T.R.col1.y);
+		a.y = (a.x * T.R.col2.x + a.y * T.R.col2.y);
 		a.x = tX;
 		return a;
 	}
@@ -121,9 +151,21 @@ class B2Math {
 		return v;
 	}
 
-	static public function subtractVV(a:B2Vec2, b:B2Vec2):B2Vec2
+	static public function subtractVV(a:B2Vec2, b:B2Vec2, fromPool:Bool = false):B2Vec2
 	{
-		var v:B2Vec2 = new B2Vec2(a.x - b.x, a.y - b.y);
+		var v:B2Vec2;
+		
+		if(fromPool)
+		{
+			v = B2Vec2.getFromPool();
+			v.set(a.x - b.x, a.y - b.y);
+		} 
+		
+		else 
+		{	
+			v = new B2Vec2(a.x - b.x, a.y - b.y);
+		}
+		
 		return v;
 	}
 	
