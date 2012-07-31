@@ -571,6 +571,8 @@ class B2World
 	* @param positionIterations for the position constraint solver.
 	*/
 	public function step(dt:Float, velocityIterations:Int, positionIterations:Int) : Void{
+		B2Vec2.freePool();
+		
 		if ((m_flags & e_newFixture) != 0)
 		{
 			m_contactManager.findNewContacts();
