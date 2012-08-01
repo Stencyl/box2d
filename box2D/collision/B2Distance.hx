@@ -134,11 +134,11 @@ public static function distance(output:B2DistanceOutput, cache:B2SimplexCache, i
 		
 		// Compute a tentative new simplex vertex using support points
 		var vertex:B2SimplexVertex = vertices[simplex.m_count];
-		vertex.indexA = Std.int (proxyA.getSupport(B2Math.mulTMV(transformA.R, d.getNegative(), true)));
-		vertex.wA = B2Math.mulX(transformA, proxyA.getVertex(vertex.indexA));
+		vertex.indexA = Std.int (proxyA.getSupport(B2Math.mulTMV(transformA.R, d.getNegativePooled(), true)));
+		vertex.wA = B2Math.mulX(transformA, proxyA.getVertex(vertex.indexA), true); //pooled since this is all temp
 		vertex.indexB = Std.int (proxyB.getSupport(B2Math.mulTMV(transformB.R, d, true)));
-		vertex.wB = B2Math.mulX(transformB, proxyB.getVertex(vertex.indexB));
-		vertex.w = B2Math.subtractVV(vertex.wB, vertex.wA);
+		vertex.wB = B2Math.mulX(transformB, proxyB.getVertex(vertex.indexB), true); //pooled since this is all temp
+		vertex.w = B2Math.subtractVVPooled(vertex.wB, vertex.wA); //pooled since this is all temp
 		
 		// Iteration count is equated to the number of support point calls.
 		++iter;
@@ -169,7 +169,7 @@ public static function distance(output:B2DistanceOutput, cache:B2SimplexCache, i
 	
 	// Prepare output
 	simplex.getWitnessPoints(output.pointA, output.pointB);
-	output.distance = B2Math.subtractVV(output.pointA, output.pointB).length();
+	output.distance = B2Math.subtractVVPooled(output.pointA, output.pointB).length();
 	output.iterations = iter;
 	
 	// Cache the simplex
@@ -197,7 +197,8 @@ public static function distance(output:B2DistanceOutput, cache:B2SimplexCache, i
 		{
 			// Shapes are overlapped when radii are considered.
 			// Move the witness points to the middle.
-			p = new B2Vec2();
+			//p = new B2Vec2();
+			p = B2Vec2.getFromPool();
 			p.x = .5 * (output.pointA.x + output.pointB.x);
 			p.y = .5 * (output.pointA.y + output.pointB.y);
 			output.pointA.x = output.pointB.x = p.x;

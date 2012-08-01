@@ -86,9 +86,21 @@ class B2Math {
 		return v;
 	}
 
-	static public function crossFV(s:Float, a:B2Vec2):B2Vec2
+	static public function crossFV(s:Float, a:B2Vec2, fromPool:Bool = false):B2Vec2
 	{
-		var v:B2Vec2 = new B2Vec2(-s * a.y, s * a.x);
+		var v:B2Vec2;
+		
+		if(fromPool) 
+		{
+			v = B2Vec2.getFromPool();
+			v.set(-s * a.y, s * a.x);	
+		} 
+		
+		else 
+		{	
+			v = new B2Vec2(-s * a.y, s * a.x);
+		}
+		
 		return v;
 	}
 

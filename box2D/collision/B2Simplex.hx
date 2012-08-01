@@ -60,9 +60,9 @@ public function readCache(cache:B2SimplexCache,
 		v.indexB = cache.indexB[i];
 		wALocal = proxyA.getVertex(v.indexA);
 		wBLocal = proxyB.getVertex(v.indexB);
-		v.wA = B2Math.mulX(transformA, wALocal);
-		v.wB = B2Math.mulX(transformB, wBLocal);
-		v.w = B2Math.subtractVV(v.wB, v.wA);
+		v.wA = B2Math.mulX(transformA, wALocal, true);
+		v.wB = B2Math.mulX(transformB, wBLocal, true);
+		v.w = B2Math.subtractVVPooled(v.wB, v.wA);
 		v.a = 0;
 	}
 	
@@ -87,9 +87,9 @@ public function readCache(cache:B2SimplexCache,
 		v.indexB = 0;
 		wALocal = proxyA.getVertex(0);
 		wBLocal = proxyB.getVertex(0);
-		v.wA = B2Math.mulX(transformA, wALocal);
-		v.wB = B2Math.mulX(transformB, wBLocal);
-		v.w = B2Math.subtractVV(v.wB, v.wA);
+		v.wA = B2Math.mulX(transformA, wALocal, true);
+		v.wB = B2Math.mulX(transformB, wBLocal, true);
+		v.w = B2Math.subtractVVPooled(v.wB, v.wA);
 		m_count = 1;
 	}
 }
@@ -111,24 +111,24 @@ public function getSearchDirection():B2Vec2
 	switch(m_count)
 	{
 		case 1:
-			return m_v1.w.getNegative();
+			return m_v1.w.getNegativePooled();
 			
 		case 2:
 		{
-			var e12:B2Vec2 = B2Math.subtractVV(m_v2.w, m_v1.w);
+			var e12:B2Vec2 = B2Math.subtractVVPooled(m_v2.w, m_v1.w);
 			var sgn:Float = B2Math.crossVV(e12, m_v1.w.getNegative());
 			if (sgn > 0.0)
 			{
 				// Origin is left of e12.
-				return B2Math.crossFV(1.0, e12);
+				return B2Math.crossFV(1.0, e12, true);
 			}else {
 				// Origin is right of e12.
-				return B2Math.crossVF(e12, 1.0);
+				return B2Math.crossVF(e12, 1.0, true);
 			}
 		}
 		default:
 		B2Settings.b2Assert(false);
-		return new B2Vec2();
+		return B2Vec2.getFromPool();
 	}
 }
 
@@ -138,16 +138,17 @@ public function getClosestPoint():B2Vec2
 	{
 		case 0:
 			B2Settings.b2Assert(false);
-			return new B2Vec2();
+			return B2Vec2.getFromPool();
 		case 1:
 			return m_v1.w;
 		case 2:
-			return new B2Vec2(
-					m_v1.a * m_v1.w.x + m_v2.a * m_v2.w.x,
-					m_v1.a * m_v1.w.y + m_v2.a * m_v2.w.y);
+			var toReturn = B2Vec2.getFromPool();
+			toReturn.x = m_v1.a * m_v1.w.x + m_v2.a * m_v2.w.x;
+			toReturn.y = m_v1.a * m_v1.w.y + m_v2.a * m_v2.w.y;
+			return toReturn;
 		default:
 			B2Settings.b2Assert(false);
-			return new B2Vec2();
+			return B2Vec2.getFromPool();
 	}
 }
 
@@ -190,10 +191,10 @@ public function getMetric():Float
 		return 0.0;
 
 	case 2:
-		return B2Math.subtractVV(m_v1.w, m_v2.w).length();
+		return B2Math.subtractVVPooled(m_v1.w, m_v2.w).length();
 
 	case 3:
-		return B2Math.crossVV(B2Math.subtractVV(m_v2.w, m_v1.w),B2Math.subtractVV(m_v3.w, m_v1.w));
+		return B2Math.crossVV(B2Math.subtractVVPooled(m_v2.w, m_v1.w),B2Math.subtractVVPooled(m_v3.w, m_v1.w));
 
 	default:
 		B2Settings.b2Assert(false);
