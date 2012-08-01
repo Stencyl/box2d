@@ -225,7 +225,7 @@ class B2DynamicTree
 			
 		var p1:B2Vec2 = input.p1;
 		var p2:B2Vec2 = input.p2;
-		var r:B2Vec2 = B2Math.subtractVV(p1, p2, true);
+		var r:B2Vec2 = B2Math.subtractVVPooled(p1, p2);
 		//b2Settings.b2Assert(r.LengthSquared() > 0.0);
 		r.normalize();
 		

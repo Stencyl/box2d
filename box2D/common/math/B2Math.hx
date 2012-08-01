@@ -138,7 +138,7 @@ class B2Math {
 
 	static public function mulXT(T:B2Transform, v:B2Vec2, fromPool:Bool = false):B2Vec2
 	{
-		var a:B2Vec2 = subtractVV(v, T.position, fromPool);
+		var a:B2Vec2 = subtractVVPooled(v, T.position);
 		var tX:Float = (a.x * T.R.col1.x + a.y * T.R.col1.y);
 		a.y = (a.x * T.R.col2.x + a.y * T.R.col2.y);
 		a.x = tX;
@@ -151,21 +151,15 @@ class B2Math {
 		return v;
 	}
 
-	static public function subtractVV(a:B2Vec2, b:B2Vec2, fromPool:Bool = false):B2Vec2
+	static public function subtractVV(a:B2Vec2, b:B2Vec2):B2Vec2
 	{
-		var v:B2Vec2;
-		
-		if(fromPool)
-		{
-			v = B2Vec2.getFromPool();
-			v.set(a.x - b.x, a.y - b.y);
-		} 
-		
-		else 
-		{	
-			v = new B2Vec2(a.x - b.x, a.y - b.y);
-		}
-		
+		return new B2Vec2(a.x - b.x, a.y - b.y);
+	}
+	
+	static public function subtractVVPooled(a:B2Vec2, b:B2Vec2):B2Vec2
+	{
+		var v:B2Vec2 = B2Vec2.getFromPool();
+		v.set(a.x - b.x, a.y - b.y);
 		return v;
 	}
 	

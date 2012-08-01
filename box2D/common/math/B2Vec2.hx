@@ -27,12 +27,12 @@ class B2Vec2
 {
 	public function new(x_:Float=0, y_:Float=0) : Void {x=x_; y=y_;}
 
-	public function setZero() : Void { x = 0.0; y = 0.0; }
-	public function set(x_:Float=0, y_:Float=0) : Void {x=x_; y=y_;}
-	public function setV(v:B2Vec2) : Void {x=v.x; y=v.y;}
+	inline public function setZero() : Void { x = 0.0; y = 0.0; }
+	inline public function set(x_:Float=0, y_:Float=0) : Void {x=x_; y=y_;}
+	inline public function setV(v:B2Vec2) : Void {x=v.x; y=v.y;}
 
 	public function getNegative():B2Vec2 { return new B2Vec2(-x, -y); }
-	public function negativeSelf():Void { x = -x; y = -y; }
+	inline public function negativeSelf():Void { x = -x; y = -y; }
 	
 	static public function make(x_:Float, y_:Float):B2Vec2
 	{
@@ -179,19 +179,20 @@ class B2Vec2
 	public static function freePool() 
 	{
 		pooli = 0;
+		//trace("Free Pool");
 	}
 
 	public static var poolOverride:B2Vec2;
 	
 	public static function getFromPool():B2Vec2 
 	{
-		if(poolOverride != null) 
+		/*if(poolOverride != null) 
 		{	
 			var po:B2Vec2 = poolOverride;
 			po.poolStale = false;
 			poolOverride = null;
 			return po;	
-		}
+		}*/
 		
 		if(pooli < pool.length)
 		{
@@ -199,14 +200,16 @@ class B2Vec2
 			contact.x = 0;
 			contact.y = 0;
 			pooli++;
+			//trace("Reusing V: " + pooli);
 			return contact;
 		} 
 		
 		else 
 		{	
 			var contact:B2Vec2 = new B2Vec2();
-			pool.push( contact );
+			pool.push(contact);
 			pooli++;
+			//trace("Pool Size: " + pooli);
 			return contact;
 		}
 	}

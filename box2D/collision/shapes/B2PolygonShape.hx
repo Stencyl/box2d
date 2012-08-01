@@ -110,7 +110,7 @@ class B2PolygonShape extends B2Shape
 		{
 			var i1:Int = i;
 			var i2:Int = i + 1 < m_vertexCount ? i + 1 : 0;
-			var edge:B2Vec2 = B2Math.subtractVV(m_vertices[i2], m_vertices[i1], true);
+			var edge:B2Vec2 = B2Math.subtractVVPooled(m_vertices[i2], m_vertices[i1]);
 			B2Settings.b2Assert(edge.lengthSquared() > B2Math.MIN_VALUE /* * Number.MIN_VALUE*/);
 			m_normals[i].setV(B2Math.crossVF(edge, 1.0));
 			m_normals[i].normalize();

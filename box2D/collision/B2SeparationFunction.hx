@@ -159,13 +159,13 @@ class B2SeparationFunction
 			localPointB2 = m_proxyB.getVertex(cache.indexB[1]);
 			
 			var pA:B2Vec2 = B2Math.mulX(transformA, localPointA, true);
-			var dA:B2Vec2 = B2Math.mulMV(transformA.R, B2Math.subtractVV(localPointA2, localPointA1, true), true);
+			var dA:B2Vec2 = B2Math.mulMV(transformA.R, B2Math.subtractVVPooled(localPointA2, localPointA1), true);
 			var pB:B2Vec2 = B2Math.mulX(transformB, localPointB, true);
-			var dB:B2Vec2 = B2Math.mulMV(transformB.R, B2Math.subtractVV(localPointB2, localPointB1, true), true);
+			var dB:B2Vec2 = B2Math.mulMV(transformB.R, B2Math.subtractVVPooled(localPointB2, localPointB1), true);
 			
 			var a:Float = dA.x * dA.x + dA.y * dA.y;
 			var e:Float = dB.x * dB.x + dB.y * dB.y;
-			var r:B2Vec2 = B2Math.subtractVV(dB, dA, true);
+			var r:B2Vec2 = B2Math.subtractVVPooled(dB, dA);
 			var c:Float = dA.x * r.x + dA.y * r.y;
 			var f:Float = dB.x * r.x + dB.y * r.y;
 			

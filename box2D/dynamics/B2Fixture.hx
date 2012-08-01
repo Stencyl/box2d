@@ -345,15 +345,18 @@ class B2Fixture
 			return;
 			
 		// Compute an AABB that ocvers the swept shape (may miss some rotation effect)
-		var aabb1:B2AABB = new B2AABB();
-		var aabb2:B2AABB = new B2AABB();
-		m_shape.computeAABB(aabb1, transform1);
-		m_shape.computeAABB(aabb2, transform2);
+		//var aabb1:B2AABB = new B2AABB();
+		//var aabb2:B2AABB = new B2AABB();
+		m_shape.computeAABB(tempAABB1, transform1);
+		m_shape.computeAABB(tempAABB2, transform2);
 		
-		m_aabb.combine(aabb1, aabb2);
-		var displacement:B2Vec2 = B2Math.subtractVV(transform2.position, transform1.position);
+		m_aabb.combine(tempAABB1, tempAABB2);
+		var displacement:B2Vec2 = B2Math.subtractVVPooled(transform2.position, transform1.position);
 		broadPhase.moveProxy(m_proxy, m_aabb, displacement);
 	}
+	
+	private static var tempAABB1:B2AABB = new B2AABB();
+	private static var tempAABB2:B2AABB = new B2AABB();
 	
 	private var m_massData:B2MassData;
 	

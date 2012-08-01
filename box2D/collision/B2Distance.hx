@@ -186,7 +186,7 @@ public static function distance(output:B2DistanceOutput, cache:B2SimplexCache, i
 			// Shapes are still not overlapped.
 			// Move the witness points to the outer surface.
 			output.distance -= rA + rB;
-			var normal:B2Vec2 = B2Math.subtractVV(output.pointB, output.pointA, true);
+			var normal:B2Vec2 = B2Math.subtractVVPooled(output.pointB, output.pointA);
 			normal.normalize();
 			output.pointA.x += rA * normal.x;
 			output.pointA.y += rA * normal.y;

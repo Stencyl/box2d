@@ -228,7 +228,7 @@ public function solve2():Void
 {
 	var w1:B2Vec2 = m_v1.w;
 	var w2:B2Vec2 = m_v2.w;
-	var e12:B2Vec2 = B2Math.subtractVV(w2, w1, true);
+	var e12:B2Vec2 = B2Math.subtractVVPooled(w2, w1);
 	
 	// w1 region
 	var d12_2:Float = -(w1.x * e12.x + w1.y * e12.y);
@@ -268,7 +268,7 @@ public function solve3():Void
 	// [1      1     ][a1] = [1]
 	// [w1.e12 w2.e12][a2] = [0]
 	// a3 = 0
-	var e12:B2Vec2 = B2Math.subtractVV(w2, w1, true);
+	var e12:B2Vec2 = B2Math.subtractVVPooled(w2, w1);
 	var w1e12:Float = B2Math.dot(w1, e12);
 	var w2e12:Float = B2Math.dot(w2, e12);
 	var d12_1:Float = w2e12;
@@ -278,7 +278,7 @@ public function solve3():Void
 	// [1      1     ][a1] = [1]
 	// [w1.e13 w3.e13][a3] = [0]
 	// a2 = 0
-	var e13:B2Vec2 = B2Math.subtractVV(w3, w1, true);
+	var e13:B2Vec2 = B2Math.subtractVVPooled(w3, w1);
 	var w1e13:Float = B2Math.dot(w1, e13);
 	var w3e13:Float = B2Math.dot(w3, e13);
 	var d13_1:Float = w3e13;
@@ -288,7 +288,7 @@ public function solve3():Void
 	// [1      1     ][a2] = [1]
 	// [w2.e23 w3.e23][a3] = [0]
 	// a1 = 0
-	var e23:B2Vec2 = B2Math.subtractVV(w3, w2, true);
+	var e23:B2Vec2 = B2Math.subtractVVPooled(w3, w2);
 	var w2e23:Float = B2Math.dot(w2, e23);
 	var w3e23:Float = B2Math.dot(w3, e23);
 	var d23_1:Float = w3e23;
