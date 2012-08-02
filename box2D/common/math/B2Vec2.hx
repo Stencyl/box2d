@@ -31,7 +31,11 @@ class B2Vec2
 	inline public function set(x_:Float=0, y_:Float=0) : Void {x=x_; y=y_;}
 	inline public function setV(v:B2Vec2) : Void {x=v.x; y=v.y;}
 
-	public function getNegative():B2Vec2 { return new B2Vec2(-x, -y); }
+	public function getNegative():B2Vec2
+	{ 
+		return new B2Vec2(-x, -y); 
+	}
+	
 	public function getNegativePooled():B2Vec2 
 	{
 		var v = B2Vec2.getFromPool();
@@ -39,7 +43,11 @@ class B2Vec2
 		v.y = -y;
 		return v;  
 	}
-	inline public function negativeSelf():Void { x = -x; y = -y; }
+	
+	inline public function negativeSelf():Void 
+	{ 
+		x = -x; y = -y; 
+	}
 	
 	static public function make(x_:Float, y_:Float):B2Vec2
 	{
@@ -149,11 +157,13 @@ class B2Vec2
 		return length;
 	}
 	
-	public function perpDot(b:B2Vec2):Float {
+	public function perpDot(b:B2Vec2):Float
+	{
 		return -y * b.x + x * b.y;
 	}
 	
-	public function winding(b:B2Vec2, c:B2Vec2):Float {
+	public function winding(b:B2Vec2, c:B2Vec2):Float 
+	{
 		var clone = b.copy();
 		clone.subtract(this);
 		
@@ -172,8 +182,6 @@ class B2Vec2
 	public var y:Float;
 	
 	//POOLING
-	public var poolStale:Bool;
-	
 	public function reset() 
 	{
 		x = 0;
@@ -186,28 +194,16 @@ class B2Vec2
 	public static function freePool() 
 	{
 		pooli = 0;
-		//trace("Free Pool");
 	}
 
-	public static var poolOverride:B2Vec2;
-	
 	public static function getFromPool():B2Vec2 
 	{
-		/*if(poolOverride != null) 
-		{	
-			var po:B2Vec2 = poolOverride;
-			po.poolStale = false;
-			poolOverride = null;
-			return po;	
-		}*/
-		
 		if(pooli < pool.length)
 		{
 			var contact:B2Vec2 = pool[pooli];
 			contact.x = 0;
 			contact.y = 0;
 			pooli++;
-			//trace("Reusing V: " + pooli);
 			return contact;
 		} 
 		
@@ -216,7 +212,6 @@ class B2Vec2
 			var contact:B2Vec2 = new B2Vec2();
 			pool.push(contact);
 			pooli++;
-			//trace("Pool Size: " + pooli);
 			return contact;
 		}
 	}

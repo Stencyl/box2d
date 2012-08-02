@@ -120,7 +120,7 @@ class B2Shape
 				
 	public static function testOverlap(shape1:B2Shape, transform1:B2Transform, shape2:B2Shape, transform2:B2Transform):Bool
 	{
-		/*var input:B2DistanceInput = new B2DistanceInput ();
+		var input:B2DistanceInput = new B2DistanceInput ();
 		input.proxyA = new B2DistanceProxy ();
 		input.proxyA.set(shape1);
 		input.proxyB = new B2DistanceProxy();
@@ -132,7 +132,7 @@ class B2Shape
 		simplexCache.count = 0;
 		var output:B2DistanceOutput = new B2DistanceOutput();
 		B2Distance.distance(output, simplexCache, input);
-		return output.distance  < 10.0 * B2Math.MIN_VALUE;*/
+		return output.distance  < 10.0 * B2Math.MIN_VALUE;
 		
 		/*distanceInput.proxyA = proxyA;
 		distanceInput.proxyA.set(shape1);
@@ -145,7 +145,7 @@ class B2Shape
 		B2Distance.distance(distanceOutput, simplexCache, distanceInput);
 		return distanceOutput.distance  < 10.0 * B2Math.MIN_VALUE;*/
 		
-		return false;
+		return true;
 	}
 	
 	public static var distanceInput:B2DistanceInput = new B2DistanceInput();
