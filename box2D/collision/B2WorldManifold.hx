@@ -41,6 +41,18 @@ class B2WorldManifold
 			m_points[i] = new B2Vec2();
 		}
 	}
+	
+	inline public function reset()
+	{
+		m_normal = new B2Vec2();	
+		
+		m_points = new Array <B2Vec2> ();
+		for (i in 0...B2Settings.b2_maxManifoldPoints)
+		{
+			m_points[i] = new B2Vec2();
+		}
+	}
+	
 	/**
 	 * Evaluate the manifold with supplied transforms. This assumes
 	 * modest motion from the original state. This does not change the
@@ -55,6 +67,8 @@ class B2WorldManifold
 		{
 			return;
 		}
+		
+		reset();
 		
 		var i:Int;
 		var tVec:B2Vec2;
