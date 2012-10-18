@@ -1023,7 +1023,7 @@ class B2World
 			}
 			//END STENCYL
 			
-			if (seed.isAwake() == false || seed.isActive() == false)
+			if (seed.isAwake() == false || seed.isActive() == false || seed.isPaused())
 			{
 				seed = seed.m_next;
 				continue;
