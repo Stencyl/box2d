@@ -1044,7 +1044,7 @@ class B2World
 			{
 				seed.setAwake(false);
 				seed.setActive(false);
-				
+
 				seed = seed.m_next;
 				continue;
 			}
