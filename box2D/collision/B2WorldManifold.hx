@@ -118,8 +118,8 @@ class B2WorldManifold
 				m_points[0].y = 0.5 * (cAY + cBY);
 				
 				//XXX: Workaround for - http://community.stencyl.com/index.php/topic,14925.0.html
-				m_points[0].x *= 2;
-				m_points[0].y *= 2;
+				//m_points[0].x *= 2;
+				//m_points[0].y *= 2;
 			}
 			
 			case B2Manifold.e_faceA:
