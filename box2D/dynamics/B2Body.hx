@@ -1358,6 +1358,8 @@ class B2Body
 		
 		//STENCYL
 		groupID = bd.groupID;
+		origin = new B2Vec2();
+		size = new B2Vec2();
 	}
 	
 	// Destructor
@@ -1470,6 +1472,8 @@ class B2Body
 	
 	//STENCYL
 	public var groupID:Int;
+	public var origin:B2Vec2;
+	public var size:B2Vec2;
 	
 	
 	// m_flags
