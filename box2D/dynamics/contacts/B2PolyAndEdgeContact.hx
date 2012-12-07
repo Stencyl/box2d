@@ -18,355 +18,880 @@
 
 package box2D.dynamics.contacts;
 
-
+import box2D.collision.B2ContactID;
 import box2D.collision.B2Manifold;
+import box2D.collision.B2ManifoldPoint;
 import box2D.collision.shapes.B2EdgeShape;
 import box2D.collision.shapes.B2PolygonShape;
 import box2D.collision.shapes.B2Shape;
+import box2D.common.math.B2Math;
+import box2D.common.math.B2Mat22;
 import box2D.common.B2Settings;
 import box2D.common.math.B2Transform;
+import box2D.common.math.B2Vec2;
 import box2D.dynamics.B2Body;
 import box2D.dynamics.B2Fixture;
 
-
-/**
-* @private
-*/
-class B2PolyAndEdgeContact extends B2Contact{
+class B2PolyAndEdgeContact extends B2Contact
+{
+	static var m_xf:B2Transform = new B2Transform();
+	static var temp:B2Vec2 = new B2Vec2();
+	static var m_centroidB:B2Vec2 = new B2Vec2();
+	static var m_lowerLimit:B2Vec2 = new B2Vec2();
+	static var m_upperLimit:B2Vec2 = new B2Vec2();
+	static var m_polygonB:TempPolygon = new TempPolygon();
+	static var edgeAxis:EPAxis = new EPAxis();
+	static var polygonAxis:EPAxis = new EPAxis();
+	static var perp:B2Vec2 = new B2Vec2();
+	static var n:B2Vec2 = new B2Vec2();
+	static var rf:ReferenceFace = new ReferenceFace();
 	
-	static public function create(allocator:Dynamic):B2Contact{
+	static var ie:Array<ClipVertex> = [new ClipVertex(), new ClipVertex()];
+	static var clipPoints1:Array<ClipVertex> = [new ClipVertex(), new ClipVertex()];
+	static var clipPoints2:Array<ClipVertex> = [new ClipVertex(), new ClipVertex()];
+
+	var m_v0:B2Vec2;
+    var m_v1:B2Vec2;
+    var m_v2:B2Vec2;
+    var m_v3:B2Vec2;
+    
+    static var edge0:B2Vec2 = new B2Vec2();
+    static var edge1:B2Vec2 = new B2Vec2();
+    static var edge2:B2Vec2 = new B2Vec2();
+    
+    static var m_normal:B2Vec2 = new B2Vec2();
+    static var m_normal0:B2Vec2 = new B2Vec2();
+    static var m_normal1:B2Vec2 = new B2Vec2();
+    static var m_normal2:B2Vec2 = new B2Vec2();   
+    
+    var m_front:Bool;
+    var m_radius:Float;
+    
+	static public function create(allocator:Dynamic):B2Contact
+	{
 		return new B2PolyAndEdgeContact();
 	}
-	static public function destroy(contact:B2Contact, allocator:Dynamic): Void{
+	
+	static public function destroy(contact:B2Contact, allocator:Dynamic):Void
+	{
 	}
 
-	public override function reset(fixtureA:B2Fixture = null, fixtureB:B2Fixture = null):Void{
+	public override function reset(fixtureA:B2Fixture = null, fixtureB:B2Fixture = null):Void
+	{
 		super.reset(fixtureA, fixtureB);
 		B2Settings.b2Assert(fixtureA.getType() == B2Shape.e_polygonShape);
 		B2Settings.b2Assert(fixtureB.getType() == B2Shape.e_edgeShape);
 	}
-	//~b2PolyAndEdgeContact() {}
 
-	public override function evaluate(): Void{
+	public override function evaluate():Void
+	{
 		var bA:B2Body = m_fixtureA.getBody();
 		var bB:B2Body = m_fixtureB.getBody();
 		
 		b2CollidePolyAndEdge(m_manifold,
-					cast (m_fixtureA.getShape(), B2PolygonShape), bA.m_xf, 
-					cast (m_fixtureB.getShape(), B2EdgeShape), bB.m_xf);
+					cast(m_fixtureA.getShape(), B2PolygonShape), bA.m_xf, 
+					cast(m_fixtureB.getShape(), B2EdgeShape), bB.m_xf);
 	}
 	
-	private function b2CollidePolyAndEdge(manifold: B2Manifold,
-	                                                polygon: B2PolygonShape, 
-	                                                xf1: B2Transform,
-	                                                edge: B2EdgeShape, 
-	                                                xf2: B2Transform): Void
+	private function b2CollidePolyAndEdge(manifold:B2Manifold,
+	                                      polygonB:B2PolygonShape, 
+	                                      xfA:B2Transform,
+	                                      edgeA:B2EdgeShape, 
+	                                      xfB:B2Transform):Void
 	{
-		//TODO_BORIS
-		/*
-		manifold.pointCount = 0;
-		var tMat: B2Mat22;
-		var tVec1: B2Vec2;
-		var tVec2: B2Vec2;
-		var tX: Number;
-		var tY: Number;
-		var tPoint:B2ManifoldPoint;
-		var ratio: Number;
+		//m_xf = b2MulT(xfA, xfB);
+        //m_centroidB = b2Mul(m_xf, polygonB->m_centroid);
+        
+        //TODO: Suspicious?
+		multiplyTransformsInverse(xfA, xfB, m_xf);
+        multiplyTransformVector(m_xf, polygonB.m_centroid, temp);
+		m_centroidB.setV(temp);
+	
+		m_v0 = edgeA.m_v0;
+		m_v1 = edgeA.m_v1;
+		m_v2 = edgeA.m_v2;
+		m_v3 = edgeA.m_v3;
 		
-		//b2Vec2 v1 = b2Mul(xf2, edge->GetVertex1());
-		tMat = xf2.R;
-		tVec1 = edge.m_v1;
-		var v1X: Number = xf2.position.x + (tMat.col1.x * tVec1.x + tMat.col2.x * tVec1.y);
-		var v1Y: Number = xf2.position.y + (tMat.col1.y * tVec1.x + tMat.col2.y * tVec1.y);
-		
-		//b2Vec2 v2 = b2Mul(xf2, edge->GetVertex2());
-		tVec1 = edge.m_v2;
-		var v2X: Number = xf2.position.x + (tMat.col1.x * tVec1.x + tMat.col2.x * tVec1.y);
-		var v2Y: Number = xf2.position.y + (tMat.col1.y * tVec1.x + tMat.col2.y * tVec1.y);
-		
-		//b2Vec2 n = b2Mul(xf2.R, edge->GetNormalVector());
-		tVec1 = edge.m_normal;
-		var nX: Number = (tMat.col1.x * tVec1.x + tMat.col2.x * tVec1.y);
-		var nY: Number = (tMat.col1.y * tVec1.x + tMat.col2.y * tVec1.y);
-		
-		//b2Vec2 v1Local = b2MulT(xf1, v1);
-		tMat = xf1.R;
-		tX = v1X - xf1.position.x;
-		tY = v1Y - xf1.position.y;
-		var v1LocalX: Number = (tX * tMat.col1.x + tY * tMat.col1.y );
-		var v1LocalY: Number = (tX * tMat.col2.x + tY * tMat.col2.y );
-		
-		//b2Vec2 v2Local = b2MulT(xf1, v2);
-		tX = v2X - xf1.position.x;
-		tY = v2Y - xf1.position.y;
-		var v2LocalX: Number = (tX * tMat.col1.x + tY * tMat.col1.y );
-		var v2LocalY: Number = (tX * tMat.col2.x + tY * tMat.col2.y );
-		
-		//b2Vec2 nLocal = b2MulT(xf1.R, n);
-		var nLocalX: Number = (nX * tMat.col1.x + nY * tMat.col1.y );
-		var nLocalY: Number = (nX * tMat.col2.x + nY * tMat.col2.y );
-		
-		var separation1: Number;
-		var separationIndex1: Int = -1; // which normal on the poly found the shallowest depth?
-		var separationMax1: Number = -Number.MAX_VALUE; // the shallowest depth of edge in poly
-		var separation2: Number;
-		var separationIndex2: Int = -1; // which normal on the poly found the shallowest depth?
-		var separationMax2: Number = -Number.MAX_VALUE; // the shallowest depth of edge in poly
-		var separationMax: Number = -Number.MAX_VALUE; // the shallowest depth of edge in poly
-		var separationV1: Boolean = false; // is the shallowest depth from edge's v1 or v2 vertex?
-		var separationIndex: Int = -1; // which normal on the poly found the shallowest depth?
-		
-		var vertexCount: Int = polygon.m_vertexCount;
-		var vertices: Array = polygon.m_vertices;
-		var normals: Array = polygon.m_normals;
-		
-		var enterStartIndex: Int = -1; // the last poly vertex above the edge
-		var enterEndIndex: Int = -1; // the first poly vertex below the edge
-		var exitStartIndex: Int = -1; // the last poly vertex below the edge
-		var exitEndIndex: Int = -1; // the first poly vertex above the edge
-		
-		// the "N" in the following variables refers to the edge's normal. 
-		// these are projections of poly vertices along the edge's normal, 
-		// a.k.a. they are the separation of the poly from the edge. 
-		var prevSepN: Number = 0.0;
-		var nextSepN: Number = 0.0;
-		var enterSepN: Number = 0.0; // the depth of enterEndIndex under the edge (stored as a separation, so it's negative)
-		var exitSepN: Number = 0.0; // the depth of exitStartIndex under the edge (stored as a separation, so it's negative)
-		var deepestSepN: Number = Number.MAX_VALUE; // the depth of the deepest poly vertex under the end (stored as a separation, so it's negative)
-		
-		
-		// for each poly normal, get the edge's depth into the poly. 
-		// for each poly vertex, get the vertex's depth into the edge. 
-		// use these calculations to define the remaining variables declared above.
-		tVec1 = vertices[vertexCount-1];
-		prevSepN = (tVec1.x - v1LocalX) * nLocalX + (tVec1.y - v1LocalY) * nLocalY;
-		for (var i: Int = 0; i < vertexCount; i++)
+		//boolean hasVertex0 = edgeA.m_hasVertex0;
+        //boolean hasVertex3 = edgeA.m_hasVertex3;
+        
+        var hasVertex0 = edgeA.m_hasVertex0;
+        var hasVertex3 = edgeA.m_hasVertex3;
+        
+        //edge1.set(m_v2).subLocal(m_v1);
+        //edge1.normalize();
+        //m_normal1.set(edge1.y, -edge1.x);
+        
+        edge1.setV(m_v2);
+        edge1.subtract(m_v1);
+        edge1.normalize();
+        m_normal1.set(edge1.y, -edge1.x);
+        
+        //float offset1 = Vec2.dot(m_normal1, temp.set(m_centroidB).subLocal(m_v1));
+        //float offset0 = 0.0f, offset2 = 0.0f;
+        //boolean convex1 = false, convex2 = false;
+        
+        temp.setV(m_centroidB);
+        temp.subtract(m_v1);
+        
+        var offset1 = B2Math.dot(m_normal1, temp);
+        var offset0:Float = 0.0;
+        var offset2:Float = 0.0;
+        var convex1 = false;
+        var convex2 = false;
+        
+        //-----------------------------
+        
+        /*
+          //Is there a preceding edge?
+		  if(hasVertex0) 
+		  {
+			edge0.set(m_v1).subLocal(m_v0);
+			edge0.normalize();
+			m_normal0.set(edge0.y, -edge0.x);
+			convex1 = Vec2.cross(edge0, edge1) >= 0.0f;
+			offset0 = Vec2.dot(m_normal0, temp.set(m_centroidB).subLocal(m_v0));
+		  }
+        */
+        
+        //Is there a preceding edge?
+		if(hasVertex0) 
 		{
-			tVec1 = vertices[i];
-			tVec2 = normals[i];
-			separation1 = (v1LocalX - tVec1.x) * tVec2.x + (v1LocalY - tVec1.y) * tVec2.y;
-			separation2 = (v2LocalX - tVec1.x) * tVec2.x + (v2LocalY - tVec1.y) * tVec2.y;
-			if (separation2 < separation1) {
-				if (separation2 > separationMax) {
-					separationMax = separation2;
-					separationV1 = false;
-					separationIndex = i;
-				}
-			} else {
-				if (separation1 > separationMax) {
-					separationMax = separation1;
-					separationV1 = true;
-					separationIndex = i;
-				}
-			}
-			if (separation1 > separationMax1) {
-				separationMax1 = separation1;
-				separationIndex1 = i;
-			}
-			if (separation2 > separationMax2) {
-				separationMax2 = separation2;
-				separationIndex2 = i;
-			}
+			edge0.setV(m_v1);
+			edge0.subtract(m_v0);
+			edge0.normalize();
 			
-			nextSepN = (tVec1.x - v1LocalX) * nLocalX + (tVec1.y - v1LocalY) * nLocalY;
-			if (nextSepN >= 0.0 && prevSepN < 0.0) {
-				exitStartIndex = (i == 0) ? vertexCount-1 : i-1;
-				exitEndIndex = i;
-				exitSepN = prevSepN;
-			} else if (nextSepN < 0.0 && prevSepN >= 0.0) {
-				enterStartIndex = (i == 0) ? vertexCount-1 : i-1;
-				enterEndIndex = i;
-				enterSepN = nextSepN;
-			}
-			if (nextSepN < deepestSepN) {
-				deepestSepN = nextSepN;
-			}
-			prevSepN = nextSepN;
+			m_normal0.set(edge0.y, -edge0.x);
+			convex1 = B2Math.crossVV(edge0, edge1) >= 0.0;
+			
+			temp.setV(m_centroidB);
+			temp.subtract(m_v0);
+			offset0 = B2Math.dot(m_normal0, temp);
 		}
 		
-		if (enterStartIndex == -1) {
-			// poly is entirely below or entirely above edge, return with no contact:
-			return;
-		}
-		if (separationMax > 0.0) {
-			// poly is laterally disjoint with edge, return with no contact:
-			return;
-		}
-		
-		// if the poly is near a convex corner on the edge
-		if ((separationV1 && edge.m_cornerConvex1) || (!separationV1 && edge.m_cornerConvex2)) {
-			// if shallowest depth was from edge into poly, 
-			// use the edge's vertex as the contact point:
-			if (separationMax > deepestSepN + b2Settings.b2_linearSlop) {
-				// if -normal angle is closer to adjacent edge than this edge, 
-				// let the adjacent edge handle it and return with no contact:
-				if (separationV1) {
-					tMat = xf2.R;
-					tVec1 = edge.m_cornerDir1;
-					tX = (tMat.col1.x * tVec1.x + tMat.col2.x * tVec1.y);
-					tY = (tMat.col1.y * tVec1.x + tMat.col2.y * tVec1.y);
-					tMat = xf1.R;
-					v1X = (tMat.col1.x * tX + tMat.col2.x * tY); // note abuse of v1... 
-					v1Y = (tMat.col1.y * tX + tMat.col2.y * tY);
-					tVec2 = normals[separationIndex1];
-					if (tVec2.x * v1X + tVec2.y * v1Y >= 0.0) {
-						return;
-					}
-				} else {
-					tMat = xf2.R;
-					tVec1 = edge.m_cornerDir2;
-					tX = (tMat.col1.x * tVec1.x + tMat.col2.x * tVec1.y);
-					tY = (tMat.col1.y * tVec1.x + tMat.col2.y * tVec1.y);
-					tMat = xf1.R;
-					v1X = (tMat.col1.x * tX + tMat.col2.x * tY); // note abuse of v1... 
-					v1Y = (tMat.col1.y * tX + tMat.col2.y * tY);
-					tVec2 = normals[separationIndex2];
-					if (tVec2.x * v1X + tVec2.y * v1Y <= 0.0) {
-						return;
-					}
-				}
-				
-				tPoint = manifold.points[0];
-				manifold.pointCount = 1;
-				
-				//manifold->normal = b2Mul(xf1.R, normals[separationIndex]);
-				tMat = xf1.R;
-				tVec2 = normals[separationIndex];
-				manifold.normal.x = (tMat.col1.x * tVec2.x + tMat.col2.x * tVec2.y);
-				manifold.normal.y = (tMat.col1.y * tVec2.x + tMat.col2.y * tVec2.y);
-				
-				tPoint.separation = separationMax;
-				tPoint.id.features.incidentEdge = separationIndex;
-				tPoint.id.features.incidentVertex = b2Collision.b2_nullFeature;
-				tPoint.id.features.referenceEdge = 0;
-				tPoint.id.features.flip = 0;
-				if (separationV1) {
-					tPoint.localPoint1.x = v1LocalX;
-					tPoint.localPoint1.y = v1LocalY;
-					tPoint.localPoint2.x = edge.m_v1.x;
-					tPoint.localPoint2.y = edge.m_v1.y;
-				} else {
-					tPoint.localPoint1.x = v2LocalX;
-					tPoint.localPoint1.y = v2LocalY;
-					tPoint.localPoint2.x = edge.m_v2.x;
-					tPoint.localPoint2.y = edge.m_v2.y;
-				}
-				return;
-			}
-		}
-		
-		// We're going to use the edge's normal now.
-		manifold.normal.x = -nX;
-		manifold.normal.y = -nY;
-		
-		// Check whether we only need one contact point.
-		if (enterEndIndex == exitStartIndex) {
-			tPoint = manifold.points[0];
-			manifold.pointCount = 1;
-			tPoint.id.features.incidentEdge = enterEndIndex;
-			tPoint.id.features.incidentVertex = b2Collision.b2_nullFeature;
-			tPoint.id.features.referenceEdge = 0;
-			tPoint.id.features.flip = 0;
-			tVec1 = vertices[enterEndIndex];
-			tPoint.localPoint1.x = tVec1.x;
-			tPoint.localPoint1.y = tVec1.y;
-			
-			tMat = xf1.R;
-			tX = xf1.position.x + (tMat.col1.x * tVec1.x + tMat.col2.x * tVec1.y) - xf2.position.x;
-			tY = xf1.position.y + (tMat.col1.y * tVec1.x + tMat.col2.y * tVec1.y) - xf2.position.y;
-			tMat = xf2.R;
-			tPoint.localPoint2.x = (tX * tMat.col1.x + tY * tMat.col1.y );
-			tPoint.localPoint2.y = (tX * tMat.col2.x + tY * tMat.col2.y );
-			
-			tPoint.separation = enterSepN;
-			return;
-		}
-			
-		manifold.pointCount = 2;
-		
-		// the edge's direction vector, but in the frame of the polygon:
-		tX = -nLocalY;
-		tY = nLocalX;
-		
-		tVec1 = vertices[enterEndIndex];
-		var dirProj1: Number = tX * (tVec1.x - v1LocalX) + tY * (tVec1.y - v1LocalY);
-		var dirProj2: Number;
-		
-		// The contact resolution is more robust if the two manifold points are 
-		// adjacent to each other on the polygon. So pick the first two poly
-		// vertices that are under the edge:
-		exitEndIndex = (enterEndIndex == vertexCount - 1) ? 0 : enterEndIndex + 1;
-		tVec1 = vertices[exitStartIndex];
-		if (exitEndIndex != exitStartIndex) {
-			exitStartIndex = exitEndIndex;
-			
-			exitSepN = nLocalX * (tVec1.x - v1LocalX) + nLocalY * (tVec1.y - v1LocalY);
-		}
-		dirProj2 = tX * (tVec1.x - v1LocalX) + tY * (tVec1.y - v1LocalY);
-		
-		tPoint = manifold.points[0];
-		tPoint.id.features.incidentEdge = enterEndIndex;
-		tPoint.id.features.incidentVertex = b2Collision.b2_nullFeature;
-		tPoint.id.features.referenceEdge = 0;
-		tPoint.id.features.flip = 0;
-		
-		if (dirProj1 > edge.m_length) {
-			tPoint.localPoint1.x = v2LocalX;
-			tPoint.localPoint1.y = v2LocalY;
-			tPoint.localPoint2.x = edge.m_v2.x;
-			tPoint.localPoint2.y = edge.m_v2.y;
-			ratio = (edge.m_length - dirProj2) / (dirProj1 - dirProj2);
-			if (ratio > 100.0 * Number.MIN_VALUE && ratio < 1.0) {
-				tPoint.separation = exitSepN * (1.0 - ratio) + enterSepN * ratio;
-			} else {
-				tPoint.separation = enterSepN;
-			}
-		} else {
-			tVec1 = vertices[enterEndIndex];
-			tPoint.localPoint1.x = tVec1.x;
-			tPoint.localPoint1.y = tVec1.y;
-			
-			tMat = xf1.R;
-			tX = xf1.position.x + (tMat.col1.x * tVec1.x + tMat.col2.x * tVec1.y) - xf2.position.x;
-			tY = xf1.position.y + (tMat.col1.y * tVec1.x + tMat.col2.y * tVec1.y) - xf2.position.y;
-			tMat = xf2.R;
-			tPoint.localPoint2.x = (tX * tMat.col1.x + tY * tMat.col1.y);
-			tPoint.localPoint2.y = (tX * tMat.col2.x + tY * tMat.col2.y);
-			
-			tPoint.separation = enterSepN;
-		}
-		
-		tPoint = manifold.points[1];
-		tPoint.id.features.incidentEdge = exitStartIndex;
-		tPoint.id.features.incidentVertex = b2Collision.b2_nullFeature;
-		tPoint.id.features.referenceEdge = 0;
-		tPoint.id.features.flip = 0;
-		
-		if (dirProj2 < 0.0) {
-			tPoint.localPoint1.x = v1LocalX;
-			tPoint.localPoint1.y = v1LocalY;
-			tPoint.localPoint2.x = edge.m_v1.x;
-			tPoint.localPoint2.y = edge.m_v1.y;
-			ratio = (-dirProj1) / (dirProj2 - dirProj1);
-			if (ratio > 100.0 * Number.MIN_VALUE && ratio < 1.0) {
-				tPoint.separation = enterSepN * (1.0 - ratio) + exitSepN * ratio;
-			} else {
-				tPoint.separation = exitSepN;
-			}
-		} else {
-			tVec1 = vertices[exitStartIndex];
-			tPoint.localPoint1.x = tVec1.x;
-			tPoint.localPoint1.y = tVec1.y;
-			
-			tMat = xf1.R;
-			tX = xf1.position.x + (tMat.col1.x * tVec1.x + tMat.col2.x * tVec1.y) - xf2.position.x;
-			tY = xf1.position.y + (tMat.col1.y * tVec1.x + tMat.col2.y * tVec1.y) - xf2.position.y;
-			tMat = xf2.R;
-			tPoint.localPoint2.x = (tX * tMat.col1.x + tY * tMat.col1.y);
-			tPoint.localPoint2.y = (tX * tMat.col2.x + tY * tMat.col2.y);
-			
-			tPoint.separation = exitSepN;
-		}
+		/*
+		//Is there a following edge?
+      	if(hasVertex3) 
+      	{
+        	edge2.set(m_v3).subLocal(m_v2);
+        	edge2.normalize();
+        	m_normal2.set(edge2.y, -edge2.x);
+        	convex2 = Vec2.cross(edge1, edge2) > 0.0f;
+        	offset2 = Vec2.dot(m_normal2, temp.set(m_centroidB).subLocal(m_v2));
+      	}
 		*/
+		
+		//Is there a following edge?
+      	if(hasVertex3) 
+      	{
+        	edge2.setV(m_v3);
+        	edge2.subtract(m_v2);
+        	edge2.normalize();
+        	
+        	m_normal2.set(edge2.y, -edge2.x);
+        	convex2 = B2Math.crossVV(edge1, edge2) > 0.0;
+        	
+        	temp.setV(m_centroidB);
+        	temp.subtract(m_v2);
+        	offset2 = B2Math.dot(m_normal2, temp);
+      	}
+      	
+      	//-----------------------------
+      	
+      	//Determine front or back collision. Determine collision normal limits.
+      	if(hasVertex0 && hasVertex3) 
+      	{
+        	if(convex1 && convex2) 
+        	{
+          		m_front = offset0 >= 0.0 || offset1 >= 0.0 || offset2 >= 0.0;
+          		
+          		if(m_front) 
+          		{
+            		m_normal.setV(m_normal1);
+            		m_lowerLimit.setV(m_normal0);
+            		m_upperLimit.setV(m_normal2);
+          		} 
+          		
+          		else 
+          		{
+            		m_normal.setV(m_normal1);
+            		m_normal.negativeSelf();
+            		m_lowerLimit.setV(m_normal1);
+            		m_lowerLimit.negativeSelf();
+            		m_upperLimit.setV(m_normal1);
+            		m_upperLimit.negativeSelf();
+          		}
+        	} 
+        	
+        	else if(convex1) 
+        	{
+          		m_front = offset0 >= 0.0 || (offset1 >= 0.0 && offset2 >= 0.0);
+          		
+          		if(m_front) 
+          		{
+            		m_normal.setV(m_normal1);
+            		m_lowerLimit.setV(m_normal0);
+            		m_upperLimit.setV(m_normal1);
+          		} 
+          		
+          		else 
+          		{
+            		m_normal.setV(m_normal1);
+            		m_normal.negativeSelf();
+            		m_lowerLimit.setV(m_normal2);
+            		m_lowerLimit.negativeSelf();
+            		m_upperLimit.setV(m_normal1);
+            		m_upperLimit.negativeSelf();
+          		}
+        	} 
+        	
+        	else if(convex2) 
+        	{
+         	 	m_front = offset2 >= 0.0 || (offset0 >= 0.0 && offset1 >= 0.0);
+         
+         		if(m_front) 
+         		{
+            		m_normal.setV(m_normal1);
+            		m_lowerLimit.setV(m_normal1);
+            		m_upperLimit.setV(m_normal2);
+          		} 
+          		
+          		else 
+          		{
+            		m_normal.setV(m_normal1);
+            		m_normal.negativeSelf();
+            		m_lowerLimit.setV(m_normal1);
+            		m_lowerLimit.negativeSelf();
+            		m_upperLimit.setV(m_normal0);
+            		m_upperLimit.negativeSelf();
+          		}
+        	}
+        	
+        	else 
+        	{
+          		m_front = offset0 >= 0.0 && offset1 >= 0.0 && offset2 >= 0.0;
+          		
+          		if(m_front) 
+          		{
+            		m_normal.setV(m_normal1);
+            		m_lowerLimit.setV(m_normal1);
+            		m_upperLimit.setV(m_normal1);
+          		} 
+          		
+          		else 
+          		{
+            		m_normal.setV(m_normal1);
+            		m_normal.negativeSelf();
+            		m_lowerLimit.setV(m_normal2);
+            		m_lowerLimit.negativeSelf();
+            		m_upperLimit.setV(m_normal0);
+            		m_upperLimit.negativeSelf();
+          		}
+        	}
+      	} 
+      
+      	else if(hasVertex0) 
+      	{
+     		if(convex1) 
+        	{
+        		m_front = offset0 >= 0.0 || offset1 >= 0.0;
+          
+          		if(m_front) 
+          		{
+            		m_normal.setV(m_normal1);
+           			m_lowerLimit.setV(m_normal0);
+            		m_upperLimit.setV(m_normal1);
+            		m_upperLimit.negativeSelf();
+          		} 
+          
+          		else
+          		{
+            		m_normal.setV(m_normal1);
+            		m_normal.negativeSelf();
+            		m_lowerLimit.setV(m_normal1);
+            		m_upperLimit.setV(m_normal1);
+            		m_upperLimit.negativeSelf();
+          		}
+        	} 
+        	
+        	else 
+        	{
+          		m_front = offset0 >= 0.0 && offset1 >= 0.0;
+          		
+				if(m_front) 
+				{
+					m_normal.setV(m_normal1);
+					m_lowerLimit.setV(m_normal1);
+					m_upperLimit.setV(m_normal1);
+					m_upperLimit.negativeSelf();
+				} 
+				
+				else 
+				{
+					m_normal.setV(m_normal1);
+					m_normal.negativeSelf();
+					m_lowerLimit.setV(m_normal1);
+					m_upperLimit.setV(m_normal0);
+					m_upperLimit.negativeSelf();
+				}
+        	}
+     	} 
+     	
+     	else if(hasVertex3) 
+     	{
+        	if(convex2) 
+        	{
+        		m_front = offset1 >= 0.0 || offset2 >= 0.0;
+        		
+				if(m_front) 
+				{
+					m_normal.setV(m_normal1);
+					m_lowerLimit.setV(m_normal1);
+					m_lowerLimit.negativeSelf();
+					m_upperLimit.setV(m_normal2);
+			 	 } 
+			  
+			  	else 
+			  	{
+					m_normal.setV(m_normal1);
+					m_normal.negativeSelf();
+					m_lowerLimit.setV(m_normal1);
+					m_lowerLimit.negativeSelf();
+					m_upperLimit.setV(m_normal1);
+			  	}
+        	}
+        	
+        	else 
+        	{
+          		m_front = offset1 >= 0.0 && offset2 >= 0.0;
+          		
+          		if(m_front) 
+          		{
+            		m_normal.setV(m_normal1);
+            		m_lowerLimit.setV(m_normal1);
+            		m_lowerLimit.negativeSelf();
+            		m_upperLimit.setV(m_normal1);
+          		} 
+          		
+          		else 
+          		{
+            		m_normal.setV(m_normal1);
+            		m_normal.negativeSelf();
+            		m_lowerLimit.setV(m_normal2);
+            		m_lowerLimit.negativeSelf();
+            		m_upperLimit.setV(m_normal1);
+          		}
+        	}
+      	} 
+      
+      	else 
+      	{
+        	m_front = offset1 >= 0.0;
+        	
+        	if(m_front) 
+        	{
+          		m_normal.setV(m_normal1);
+          		m_lowerLimit.setV(m_normal1);
+          		m_lowerLimit.negativeSelf();
+          		m_upperLimit.setV(m_normal1);
+          		m_upperLimit.negativeSelf();
+        	} 
+        	
+        	else 
+        	{
+          		m_normal.setV(m_normal1);
+          		m_normal.negativeSelf();
+          		m_lowerLimit.setV(m_normal1);
+         		m_upperLimit.setV(m_normal1);
+        	}
+      	}
+      	
+      	//-----------------------------
+      	
+      	//Get polygonB in frameA
+      	m_polygonB.count = polygonB.m_vertexCount;
+      	
+      	//TODO: Suspicious?
+      	for(i in 0...polygonB.m_vertexCount)
+      	{
+       		multiplyTransformVector(m_xf, polygonB.m_vertices[i], temp);
+       		m_polygonB.vertices[i].setV(temp);
+   
+       		multiplyRotationVector(m_xf.R, polygonB.m_normals[i], temp);
+       		m_polygonB.normals[i].setV(temp);
+    	}
+
+    	//-----------------------------
+    	
+    	m_radius = 2.0 * B2Settings.b2_polygonRadius;
+
+      	manifold.m_pointCount = 0;
+
+		computeEdgeSeparation(edgeAxis);
+
+      	//If no valid normal can be found than this edge should not collide.
+      	if(edgeAxis.type == Type.UNKNOWN) 
+      	{
+        	return;
+      	}
+
+      	if(edgeAxis.separation > m_radius) 
+      	{
+        	return;
+      	}
+
+		computePolygonSeparation(polygonAxis);
+      	
+      	if(polygonAxis.type != Type.UNKNOWN && polygonAxis.separation > m_radius) 
+      	{
+      		trace("polysep: " + polygonAxis.separation + " is > " + m_radius);
+        	return;
+     	}
+     	
+     	//Never gets past this point
+     	trace("pass!");
+    	
+    	//-----------------------------
+    	
+    	//Use hysteresis for jitter reduction.
+      	var k_relativeTol = 0.98;
+      	var k_absoluteTol = 0.001;
+
+      	var primaryAxis:EPAxis;
+      	
+      	if(polygonAxis.type == Type.UNKNOWN) 
+      	{
+        	primaryAxis = edgeAxis;
+      	}
+      	
+      	else if(polygonAxis.separation > k_relativeTol * edgeAxis.separation + k_absoluteTol) 
+      	{
+        	primaryAxis = polygonAxis;
+      	}
+      	
+      	else 
+      	{
+        	primaryAxis = edgeAxis;
+      	}
+    	
+    	//-----------------------------
+    	
+    	//ClipVertex[] ie = new ClipVertex[2];
+    	
+      	if(primaryAxis.type == Type.EDGE_A) 
+      	{
+			manifold.m_type = B2Manifold.e_faceA;
+	
+			//Search for the polygon normal that is most anti-parallel to the edge normal.
+			var bestIndex:Int = 0;
+			var bestValue:Float = B2Math.dot(m_normal, m_polygonB.normals[0]);
+			
+			for(i in 1...m_polygonB.count) 
+			{
+				var value:Float = B2Math.dot(m_normal, m_polygonB.normals[i]);
+			  	
+			  	if(value < bestValue) 
+			  	{
+					bestValue = value;
+					bestIndex = i;
+			  	}
+			}
+	
+			var i1:Int = bestIndex;
+			var i2:Int = i1 + 1 < m_polygonB.count ? i1 + 1 : 0;
+	
+			ie[0].v.setV(m_polygonB.vertices[i1]);
+			ie[0].id.indexA = 0;
+			ie[0].id.indexB = i1;
+			ie[0].id.typeA = B2ContactID.FACE;
+			ie[0].id.typeB = B2ContactID.VERTEX;
+	
+			ie[1].v.setV(m_polygonB.vertices[i2]);
+			ie[1].id.indexA = 0;
+			ie[1].id.indexB = i2;
+			ie[1].id.typeA = B2ContactID.FACE;
+			ie[1].id.typeB = B2ContactID.VERTEX;
+	
+			if(m_front) 
+			{
+			  	rf.i1 = 0;
+			  	rf.i2 = 1;
+			  	rf.v1.setV(m_v1);
+			  	rf.v2.setV(m_v2);
+			  	rf.normal.setV(m_normal1);
+			} 
+			
+			else 
+			{
+			  	rf.i1 = 1;
+			  	rf.i2 = 0;
+			  	rf.v1.setV(m_v2);
+			  	rf.v2.setV(m_v1);
+			  	rf.normal.setV(m_normal1);
+			  	rf.normal.negativeSelf();
+			}
+      	} 
+      	
+      	else 
+      	{
+			manifold.m_type = B2Manifold.e_faceB;
+	
+			ie[0].v.setV(m_v1);
+			ie[0].id.indexA = 0;
+			ie[0].id.indexB = primaryAxis.index;
+			ie[0].id.typeA = B2ContactID.VERTEX;
+			ie[0].id.typeB = B2ContactID.FACE;
+	
+			ie[1].v.setV(m_v2);
+			ie[1].id.indexA = 0;
+			ie[1].id.indexB = primaryAxis.index;
+			ie[1].id.typeA = B2ContactID.VERTEX;
+			ie[1].id.typeB = B2ContactID.FACE;
+	
+			rf.i1 = primaryAxis.index;
+			rf.i2 = rf.i1 + 1 < m_polygonB.count ? rf.i1 + 1 : 0;
+			rf.v1.setV(m_polygonB.vertices[rf.i1]);
+			rf.v2.setV(m_polygonB.vertices[rf.i2]);
+			rf.normal.setV(m_polygonB.normals[rf.i1]);
+      	}
+    	
+    	//-----------------------------
+    	
+    	rf.sideNormal1.set(rf.normal.y, -rf.normal.x);
+      	rf.sideNormal2.setV(rf.sideNormal1);
+      	rf.sideNormal2.negativeSelf();
+      	rf.sideOffset1 = B2Math.dot(rf.sideNormal1, rf.v1);
+      	rf.sideOffset2 = B2Math.dot(rf.sideNormal2, rf.v2);
+
+      	//Clip incident edge against extruded edge1 side edges.
+      	var np:Int;
+
+      	//Clip to box side 1
+      	np = clipSegmentToLine(clipPoints1, ie, rf.sideNormal1, rf.sideOffset1, rf.i1);
+
+      	if(np < B2Settings.b2_maxManifoldPoints) 
+      	{
+        	return;
+      	}
+
+      	//Clip to negative box side 1
+      	np = clipSegmentToLine(clipPoints2, clipPoints1, rf.sideNormal2, rf.sideOffset2, rf.i2);
+
+      	if(np < B2Settings.b2_maxManifoldPoints) 
+      	{
+        	return;
+      	}
+
+      	//Now clipPoints2 contains the clipped points.
+      	if(primaryAxis.type == Type.EDGE_A) 
+      	{
+        	manifold.m_localPlaneNormal.setV(rf.normal);
+        	manifold.m_localPoint.setV(rf.v1);
+      	} 
+      	
+      	else 
+      	{
+        	manifold.m_localPlaneNormal.setV(polygonB.m_normals[rf.i1]);
+        	manifold.m_localPoint.setV(polygonB.m_vertices[rf.i1]);
+      	}
+    	
+    	//-----------------------------
+    	
+    	var pointCount:Int = 0;
+    	
+      	for(i in 0...B2Settings.b2_maxManifoldPoints)
+      	{
+      		temp.setV(clipPoints2[i].v);
+      		temp.subtract(rf.v1);
+      		
+        	var separation:Float = B2Math.dot(rf.normal, temp);
+
+        	if(separation <= m_radius)
+        	{
+          		var cp:B2ManifoldPoint = manifold.m_points[pointCount];
+
+          		if(primaryAxis.type == Type.EDGE_A) 
+          		{
+          			//TODO: This is definitely wrong but we never get this far anyways.
+            		cp.m_localPoint = B2Math.mulXT(m_xf, clipPoints2[i].v);
+            		cp.m_id.set(clipPoints2[i].id);
+          		} 
+          	
+          		else 
+          		{
+            		cp.m_localPoint.setV(clipPoints2[i].v);
+            		cp.m_id.typeA = clipPoints2[i].id.typeB;
+            		cp.m_id.typeB = clipPoints2[i].id.typeA;
+            		cp.m_id.indexA = clipPoints2[i].id.indexB;
+            		cp.m_id.indexB = clipPoints2[i].id.indexA;
+          		}
+
+          		pointCount++;
+        	}
+      	}
+
+    	manifold.m_pointCount = pointCount;
+	}
+	
+	public function computeEdgeSeparation(axis:EPAxis):Void
+	{
+		axis.type = Type.EDGE_A;
+		axis.index = m_front ? 0 : 1;
+		axis.separation = B2Math.MAX_VALUE;
+	
+		for(i in 0...m_polygonB.count) 
+		{
+			temp.setV(m_polygonB.vertices[i]);
+			temp.subtract(m_v1);
+		
+			var s:Float = B2Math.dot(m_normal, temp);
+			
+			if(s < axis.separation) 
+			{
+				axis.separation = s;
+			}
+		}
+	}
+	
+	public function computePolygonSeparation(axis:EPAxis):Void
+	{
+    	axis.type = Type.UNKNOWN;
+      	axis.index = -1;
+      	axis.separation = -B2Math.MAX_VALUE;
+
+      	perp.set(-m_normal.y, m_normal.x);
+
+      	for(i in 0...m_polygonB.count) 
+      	{
+        	n.setV(m_polygonB.normals[i]);
+        	n.negativeSelf();
+
+			temp.setV(m_polygonB.vertices[i]);
+			temp.subtract(m_v1);
+        	var s1:Float = B2Math.dot(n, temp);
+        	
+        	temp.setV(m_polygonB.vertices[i]);
+        	temp.subtract(m_v2);
+        	var s2:Float = B2Math.dot(n, temp);
+        	
+        	var s:Float = Math.min(s1, s2);
+
+        	if(s > m_radius) 
+        	{
+          		//No collision
+          		axis.type = Type.EDGE_B;
+          		axis.index = i;
+          		axis.separation = s;
+          		
+          		//TODO: Print out values of vertices / normals to make sure they're sane.
+          		//trace("#" + i);
+          		//trace("No collision: " + s + " > " + m_radius);
+          		//trace("pt: " + m_polygonB.vertices[i].x + " , " + m_polygonB.vertices[i].y);
+          		//trace("sep: " + s1 + " , " + s2);
+          		
+          		return;
+        	}
+
+        	//Adjacency
+        	if(B2Math.dot(n, perp) >= 0.0) 
+        	{
+        		temp.setV(n);
+        		temp.subtract(m_upperLimit);
+        	
+          		if(B2Math.dot(temp, m_normal) < -B2Settings.b2_angularSlop) 
+          		{
+            		continue;
+          		}
+        	} 
+        	
+        	else 
+        	{
+        		temp.setV(n);
+        		temp.subtract(m_lowerLimit);
+        	
+          		if(B2Math.dot(temp, m_normal) < -B2Settings.b2_angularSlop)
+          		{
+            		continue;
+          		}
+        	}
+
+        	if(s > axis.separation) 
+        	{
+          		axis.type = Type.EDGE_B;
+          		axis.index = i;
+          		axis.separation = s;
+        	}
+      	}
+    }
+    
+    public static function clipSegmentToLine
+    (
+    	vOut:Array<ClipVertex>, 
+    	vIn:Array<ClipVertex>,
+    	normal:B2Vec2, 
+    	offset:Float, 
+    	vertexIndexA:Int
+    ):Int
+    {
+    	//Start with no output points
+   		var numOut:Int = 0;
+
+    	//Calculate the distance of end points to the line
+    	var distance0:Float = B2Math.dot(normal, vIn[0].v) - offset;
+    	var distance1:Float = B2Math.dot(normal, vIn[1].v) - offset;
+
+    	//If the points are behind the plane
+    	if(distance0 <= 0.0) 
+    	{
+     		vOut[numOut++].set(vIn[0]);
+    	}
+    	
+    	if(distance1 <= 0.0) 
+    	{
+      		vOut[numOut++].set(vIn[1]);
+    	}
+
+    	//If the points are on different sides of the plane
+    	if(distance0 * distance1 < 0.0) 
+    	{
+      		//Find intersection point of edge and plane
+      		var interp:Float = distance0 / (distance0 - distance1);
+      		
+      		//vOut[numOut].v = vIn[0].v + interp * (vIn[1].v - vIn[0].v);
+      		vOut[numOut].v.setV(vIn[1].v);
+      		vOut[numOut].v.subtract(vIn[0].v);
+      		vOut[numOut].v.multiply(interp);
+			vOut[numOut].v.add(vIn[0].v);
+
+      		//VertexA is hitting edgeB.
+      		vOut[numOut].id.indexA = vertexIndexA;
+      		vOut[numOut].id.indexB = vIn[0].id.indexB;
+      		vOut[numOut].id.typeA = B2ContactID.VERTEX;
+      		vOut[numOut].id.typeB = B2ContactID.FACE;
+      		
+      		numOut++;
+    	}
+
+    	return numOut;
+  	}
+  	
+  	public function multiplyTransformsInverse(A:B2Transform, B:B2Transform, out:B2Transform):Void
+	{
+        //b2MulT(A.q, B.q); Rotation * Rotation
+        var q = new B2Mat22();
+        multiplyRotationsInverse(A.R, B.R, q);
+        
+        //b2MulT(A.q, B.p - A.p); Rotation * Vector
+        var temp1 = new B2Vec2();
+        var temp2 = new B2Vec2();
+        temp2.setV(B.position);
+        temp2.subtract(A.position);
+        multiplyRotationVectorInverse(A.R, temp2, temp1);
+        
+        out.position = temp1;
+        out.R = q;
+	}
+	
+	public function multiplyRotationsInverse(q:B2Mat22, r:B2Mat22, out:B2Mat22)
+	{
+		out.col1.y = q.col1.x * r.col1.y - q.col1.y * r.col1.x;
+        out.col1.x = q.col1.x * r.col1.x + q.col1.y * r.col1.y;
+	}
+	
+	private function multiplyRotationVector(q:B2Mat22, v:B2Vec2, out:B2Vec2):Void
+	{
+		out.x = q.col1.x * v.x - q.col1.y * v.y;
+		out.y = q.col1.y * v.x + q.col1.x * v.y;
+	}
+	
+	private function multiplyRotationVectorInverse(q:B2Mat22, v:B2Vec2, out:B2Vec2):Void
+	{
+		out.x = q.col1.x * v.x + q.col1.y * v.y;
+		out.y = -q.col1.y * v.x + q.col1.x * v.y;
+	}
+	
+	private function multiplyTransformVector(T:B2Transform, v:B2Vec2, out:B2Vec2):Void
+	{
+		out.x = (T.R.col1.x * v.x - T.R.col1.y * v.y) + T.position.x;
+		out.y = (T.R.col1.y * v.x + T.R.col1.x * v.y) + T.position.y;
+	}
+}
+
+class TempPolygon 
+{
+	public var vertices:Array<B2Vec2>;
+	public var normals:Array<B2Vec2>;
+	public var count:Int;
+
+	public function new() 
+	{
+		vertices = new Array<B2Vec2>();
+		normals = new Array<B2Vec2>();
+	
+		for(i in 0...32)
+		{
+			vertices.push(new B2Vec2());
+			normals.push(new B2Vec2());
+		}
+	}
+}
+
+enum Type 
+{
+    UNKNOWN;
+    EDGE_A;
+    EDGE_B;
+}
+
+class EPAxis
+{
+    public var type:Type;
+    public var index:Int;
+    public var separation:Float;
+    
+    public function new()
+    {
+    }
+}
+
+class ClipVertex
+{
+	public var v:B2Vec2;
+	public var id:B2ContactID;
+	
+	public function new()
+	{
+		v = new B2Vec2();
+		id = new B2ContactID();
+	}
+	
+	public function set(cv:ClipVertex)
+	{
+		v.setV(cv.v);
+		id.set(cv.id);
+	}
+}
+
+class ReferenceFace
+{
+	public var i1:Int;
+	public var i2:Int;
+	
+	public var v1:B2Vec2;
+	public var v2:B2Vec2;
+	public var normal:B2Vec2;
+	public var sideNormal1:B2Vec2;
+	public var sideNormal2:B2Vec2;
+	
+	public var sideOffset1:Float;
+	public var sideOffset2:Float;
+	
+	public function new()
+	{
+		v1 = new B2Vec2();
+		v2 = new B2Vec2();
+		normal = new B2Vec2();
+		sideNormal1 = new B2Vec2();
+		sideNormal2 = new B2Vec2();
 	}
 }

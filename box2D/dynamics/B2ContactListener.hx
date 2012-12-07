@@ -74,7 +74,7 @@ class B2ContactListener
 			a1.addRegionContact(contact);
 			return;
 		}
-		
+
 		a1.addContact(contact);
 		a2.addContact(contact);
 	}

@@ -18,156 +18,149 @@
 
 package box2D.dynamics.contacts;
 
-
 import box2D.collision.B2Manifold;
+import box2D.collision.B2ManifoldPoint;
 import box2D.collision.shapes.B2CircleShape;
 import box2D.collision.shapes.B2EdgeShape;
 import box2D.common.math.B2Transform;
+import box2D.common.math.B2Vec2;
+import box2D.common.math.B2Mat22;
+import box2D.common.math.B2Math;
 import box2D.dynamics.B2Body;
 import box2D.dynamics.B2Fixture;
 import box2D.dynamics.contacts.B2Contact;
 
-
-/**
-* @private
-*/
 class B2EdgeAndCircleContact extends B2Contact
 {
-	static public function create(allocator:Dynamic):B2Contact{
+	static public function create(allocator:Dynamic):B2Contact
+	{
 		return new B2EdgeAndCircleContact();
 	}
-	static public function destroy(contact:B2Contact, allocator:Dynamic) : Void{
-		//
+
+	static public function destroy(contact:B2Contact, allocator:Dynamic):Void
+	{
 	}
 
-	public override function reset(fixtureA:B2Fixture = null, fixtureB:B2Fixture = null):Void{
+	public override function reset(fixtureA:B2Fixture = null, fixtureB:B2Fixture = null):Void
+	{
 		super.reset(fixtureA, fixtureB);
 		//b2Settings.b2Assert(m_shape1.m_type == b2Shape.e_circleShape);
 		//b2Settings.b2Assert(m_shape2.m_type == b2Shape.e_circleShape);
 	}
+
 	//~b2EdgeAndCircleContact() {}
-	
-	public override function evaluate() : Void{
+
+	public override function evaluate():Void
+	{
 		var bA:B2Body = m_fixtureA.getBody();
 		var bB:B2Body = m_fixtureB.getBody();
-		b2CollideEdgeAndCircle(m_manifold,
-					cast (m_fixtureA.getShape(), B2EdgeShape), bA.m_xf,
-					cast (m_fixtureB.getShape(), B2CircleShape), bB.m_xf);
+
+		b2CollideEdgeAndCircle
+		(
+			m_manifold,
+			cast(m_fixtureA.getShape(), B2EdgeShape), bA.m_xf,
+			cast(m_fixtureB.getShape(), B2CircleShape), bB.m_xf
+		);
 	}
-	
-	private function b2CollideEdgeAndCircle(manifold: B2Manifold,
-	                                        edge: B2EdgeShape, 
-	                                        xf1: B2Transform,
-	                                        circle: B2CircleShape, 
-	                                        xf2: B2Transform): Void
+
+	private function b2CollideEdgeAndCircle(manifold:B2Manifold,
+			edge:B2EdgeShape, 
+			xf1:B2Transform,
+			circle:B2CircleShape, 
+			xf2:B2Transform):Void
 	{
-		//TODO_BORIS
-		/*
 		manifold.m_pointCount = 0;
-		var tMat: B2Mat22;
-		var tVec: B2Vec2;
-		var dX: Number;
-		var dY: Number;
-		var tX: Number;
-		var tY: Number;
+
 		var tPoint:B2ManifoldPoint;
+		var dX:Float = 0;
+		var dY:Float = 0;
+		var positionX:Float = 0;
+		var positionY:Float = 0;
+		var tVec:B2Vec2;
+		var tMat:B2Mat22;
 		
-		//b2Vec2 c = b2Mul(xf2, circle->GetLocalPosition());
 		tMat = xf2.R;
-		tVec = circle.m_r;
-		var cX: Number = xf2.position.x + (tMat.col1.x * tVec.x + tMat.col2.x * tVec.y);
-		var cY: Number = xf2.position.y + (tMat.col1.y * tVec.x + tMat.col2.y * tVec.y);
+		tVec = circle.m_p;
 		
-		//b2Vec2 cLocal = b2MulT(xf1, c);
+		var cX = xf2.position.x + (tMat.col1.x * tVec.x + tMat.col2.x * tVec.y);
+		var cY = xf2.position.y + (tMat.col1.y * tVec.x + tMat.col2.y * tVec.y);
+		
+		dX = cX - xf1.position.x;
+		dY = cY - xf1.position.y;
 		tMat = xf1.R;
-		tX = cX - xf1.position.x;
-		tY = cY - xf1.position.y;
-		var cLocalX: Number = (tX * tMat.col1.x + tY * tMat.col1.y );
-		var cLocalY: Number = (tX * tMat.col2.x + tY * tMat.col2.y );
 		
-		var n: B2Vec2 = edge.m_normal;
-		var v1: B2Vec2 = edge.m_v1;
-		var v2: B2Vec2 = edge.m_v2;
-		var radius: Number = circle.m_radius;
-		var separation: Number;
+		var cLocalX = (dX * tMat.col1.x + dY * tMat.col1.y);
+		var cLocalY = (dX * tMat.col2.x + dY * tMat.col2.y);
+		var dist:Float = 0;
+		var radius = edge.m_radius + circle.m_radius;
+		tVec = edge.m_normal;
+		var separation = tVec.x * dX + tVec.y * dY;
+		var v1 = edge.m_v1;
+		var v2 = edge.m_v2;
 		
-		var dirDist: Number = (cLocalX - v1.x) * edge.m_direction.x +
-		                      (cLocalY - v1.y) * edge.m_direction.y;
-		
-		var normalCalculated: Boolean = false;
-		
-		if (dirDist <= 0) {
-			dX = cLocalX - v1.x;
-			dY = cLocalY - v1.y;
-			if (dX * edge.m_cornerDir1.x + dY * edge.m_cornerDir1.y < 0) {
-				return;
-			}
-			dX = cX - (xf1.position.x + (tMat.col1.x * v1.x + tMat.col2.x * v1.y));
-			dY = cY - (xf1.position.y + (tMat.col1.y * v1.x + tMat.col2.y * v1.y));
-		} else if (dirDist >= edge.m_length) {
-			dX = cLocalX - v2.x;
-			dY = cLocalY - v2.y;
-			if (dX * edge.m_cornerDir2.x + dY * edge.m_cornerDir2.y > 0) {
-				return;
-			}
-			dX = cX - (xf1.position.x + (tMat.col1.x * v2.x + tMat.col2.x * v2.y));
-			dY = cY - (xf1.position.y + (tMat.col1.y * v2.x + tMat.col2.y * v2.y));
-		} else {
-			separation = (cLocalX - v1.x) * n.x + (cLocalY - v1.y) * n.y;
-			if (separation > radius || separation < -radius) {
-				return;
-			}
-			separation -= radius;
-			
-			//manifold.normal = b2Mul(xf1.R, n);
-			tMat = xf1.R;
-			manifold.normal.x = (tMat.col1.x * n.x + tMat.col2.x * n.y);
-			manifold.normal.y = (tMat.col1.y * n.x + tMat.col2.y * n.y);
-			
-			normalCalculated = true;
+		if(separation < B2Math.MIN_VALUE) 
+		{
+			manifold.m_pointCount = 1;
+			manifold.m_type = B2Manifold.e_faceA;
+			manifold.m_localPlaneNormal.setV(edge.m_normal);
+			manifold.m_localPoint.x = 0.5 * (v1.x + v2.x);
+			manifold.m_localPoint.y = 0.5 * (v1.y + v2.y);
+			manifold.m_points[0].m_localPoint.setV(circle.m_p);
+			manifold.m_points[0].m_id.key = 0;
+			return;
 		}
 		
-		if (!normalCalculated) {
-			var distSqr: Number = dX * dX + dY * dY;
-			if (distSqr > radius * radius)
-			{
+		var u1:Float = (cLocalX - v1.x) * (v2.x - v1.x) + (cLocalY - v1.y) * (v2.y - v1.y);
+		var u2:Float = (cLocalX - v2.x) * (v1.x - v2.x) + (cLocalY - v2.y) * (v1.y - v2.y);
+		
+		if(u1 <= 0.0) 
+		{
+			if ((cLocalX - v1.x) * (cLocalX - v1.x) + (cLocalY - v1.y) * (cLocalY - v1.y) > radius * radius) 
 				return;
-			}
 			
-			if (distSqr < Number.MIN_VALUE)
-			{
-				separation = -radius;
-				manifold.normal.x = (tMat.col1.x * n.x + tMat.col2.x * n.y);
-				manifold.normal.y = (tMat.col1.y * n.x + tMat.col2.y * n.y);
-			}
-			else
-			{
-				distSqr = Math.sqrt(distSqr);
-				dX /= distSqr;
-				dY /= distSqr;
-				separation = distSqr - radius;
-				manifold.normal.x = dX;
-				manifold.normal.y = dY;
-			}
+			manifold.m_pointCount = 1;
+			manifold.m_type = B2Manifold.e_faceA;
+			manifold.m_localPlaneNormal.x = cLocalX - v1.x;
+			manifold.m_localPlaneNormal.y = cLocalY - v1.y;
+			manifold.m_localPlaneNormal.normalize();
+			manifold.m_localPoint.setV(v1);
+			manifold.m_points[0].m_localPoint.setV(circle.m_p);
+			manifold.m_points[0].m_id.key = 0;
 		}
 		
-		tPoint = manifold.points[0];
-		manifold.pointCount = 1;
-		tPoint.id.key = 0;
-		tPoint.separation = separation;
-		cX = cX - radius * manifold.normal.x;
-		cY = cY - radius * manifold.normal.y;
+		else if(u2 <= 0) 
+		{
+			if((cLocalX - v2.x) * (cLocalX - v2.x) + (cLocalY - v2.y) * (cLocalY - v2.y) > radius * radius) 
+				return;
+			
+			manifold.m_pointCount = 1;
+			manifold.m_type = B2Manifold.e_faceA;
+			manifold.m_localPlaneNormal.x = cLocalX - v2.x;
+			manifold.m_localPlaneNormal.y = cLocalY - v2.y;
+			manifold.m_localPlaneNormal.normalize();
+			manifold.m_localPoint.setV(v2);
+			manifold.m_points[0].m_localPoint.setV(circle.m_p);
+			manifold.m_points[0].m_id.key = 0;
+		}
 		
-		tX = cX - xf1.position.x;
-		tY = cY - xf1.position.y;
-		tPoint.localPoint1.x = (tX * tMat.col1.x + tY * tMat.col1.y );
-		tPoint.localPoint1.y = (tX * tMat.col2.x + tY * tMat.col2.y );
-		
-		tMat = xf2.R;
-		tX = cX - xf2.position.x;
-		tY = cY - xf2.position.y;
-		tPoint.localPoint2.x = (tX * tMat.col1.x + tY * tMat.col1.y );
-		tPoint.localPoint2.y = (tX * tMat.col2.x + tY * tMat.col2.y );
-		*/
+		else 
+		{
+			var faceCenterX:Float = 0.5 * (v1.x + v2.x);
+			var faceCenterY:Float = 0.5 * (v1.y + v2.y);
+			
+			separation = (cLocalX - faceCenterX) * tVec.x + (cLocalY - faceCenterY) * tVec.y;
+			
+			if(separation > radius) 
+				return;
+			
+			manifold.m_pointCount = 1;
+			manifold.m_type = B2Manifold.e_faceA;
+			manifold.m_localPlaneNormal.x = tVec.x;
+			manifold.m_localPlaneNormal.y = tVec.y;
+			manifold.m_localPlaneNormal.normalize();
+			manifold.m_localPoint.set(faceCenterX, faceCenterY);
+			manifold.m_points[0].m_localPoint.setV(circle.m_p);
+			manifold.m_points[0].m_id.key = 0;
+		}
 	}
 }

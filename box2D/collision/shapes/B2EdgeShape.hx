@@ -341,6 +341,12 @@ class B2EdgeShape extends B2Shape
 	{
 		var s:B2Shape = new B2EdgeShape(m_v1, m_v2);
 		s.set(this);
+		
+		var edge = cast(s, B2EdgeShape);
+		edge.m_v0.setV(m_v0);
+		edge.m_v3.setV(m_v3);
+		edge.m_hasVertex0 = m_hasVertex0;
+		edge.m_hasVertex3 = m_hasVertex3;
 		return s;
 	}
 
@@ -353,6 +359,11 @@ class B2EdgeShape extends B2Shape
 		s_supportVec = new B2Vec2();
 		m_v1 = new B2Vec2();
 		m_v2 = new B2Vec2();
+		
+		m_v0 = new B2Vec2();
+		m_v3 = new B2Vec2();
+		m_hasVertex0 = false;
+		m_hasVertex3 = false;
 		
 		m_coreV1 = new B2Vec2();
 		m_coreV2 = new B2Vec2();
@@ -410,6 +421,13 @@ class B2EdgeShape extends B2Shape
 
 	public var m_v1:B2Vec2;
 	public var m_v2:B2Vec2;
+	
+	//SMOOTH COLLISION
+	public var m_v0:B2Vec2;
+	public var m_v3:B2Vec2;
+	public var m_hasVertex0:Bool;
+	public var m_hasVertex3:Bool;
+	//END SMOOTH COLLISION
 	
 	public var m_coreV1:B2Vec2;
 	public var m_coreV2:B2Vec2;
