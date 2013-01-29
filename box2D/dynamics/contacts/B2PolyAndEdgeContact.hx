@@ -89,15 +89,16 @@ class B2PolyAndEdgeContact extends B2Contact
 		var bB:B2Body = m_fixtureB.getBody();
 		
 		b2CollidePolyAndEdge(m_manifold,
-					cast(m_fixtureA.getShape(), B2PolygonShape), bA.m_xf, 
-					cast(m_fixtureB.getShape(), B2EdgeShape), bB.m_xf);
+					cast(m_fixtureB.getShape(), B2EdgeShape), bB.m_xf,
+					cast(m_fixtureA.getShape(), B2PolygonShape), bA.m_xf);
 	}
 	
 	private function b2CollidePolyAndEdge(manifold:B2Manifold,
-	                                      polygonB:B2PolygonShape, 
+										  edgeA:B2EdgeShape, 
 	                                      xfA:B2Transform,
-	                                      edgeA:B2EdgeShape, 
-	                                      xfB:B2Transform):Void
+	                                      polygonB:B2PolygonShape, 
+	                                      xfB:B2Transform
+	                                      ):Void
 	{
 		//m_xf = b2MulT(xfA, xfB);
         //m_centroidB = b2Mul(m_xf, polygonB->m_centroid);
@@ -793,27 +794,29 @@ class B2PolyAndEdgeContact extends B2Contact
 	}
 	
 	public function multiplyRotationsInverse(q:B2Mat22, r:B2Mat22, out:B2Mat22)
-	{
-		out.col1.y = q.col1.x * r.col1.y - q.col1.y * r.col1.x;
-        out.col1.x = q.col1.x * r.col1.x + q.col1.y * r.col1.y;
+	{		
+		out.col1.x = q.col1.x * r.col1.x + q.col1.y * r.col1.y;
+		out.col1.y = q.col2.x * r.col1.x + q.col2.y * r.col1.y;
+		out.col2.x = q.col1.x * r.col2.x + q.col1.y * r.col2.y;
+		out.col2.y = q.col2.x * r.col2.x + q.col2.y * r.col2.y;
 	}
 	
 	private function multiplyRotationVector(q:B2Mat22, v:B2Vec2, out:B2Vec2):Void
 	{
-		out.x = q.col1.x * v.x - q.col1.y * v.y;
-		out.y = q.col1.y * v.x + q.col1.x * v.y;
+		out.x = q.col1.x * v.x + q.col2.x * v.y;
+		out.y = q.col1.y * v.x + q.col2.y * v.y;
 	}
 	
 	private function multiplyRotationVectorInverse(q:B2Mat22, v:B2Vec2, out:B2Vec2):Void
-	{
+	{		
 		out.x = q.col1.x * v.x + q.col1.y * v.y;
-		out.y = -q.col1.y * v.x + q.col1.x * v.y;
+		out.y = q.col2.x * v.x + q.col2.y * v.y;
 	}
 	
 	private function multiplyTransformVector(T:B2Transform, v:B2Vec2, out:B2Vec2):Void
 	{
-		out.x = (T.R.col1.x * v.x - T.R.col1.y * v.y) + T.position.x;
-		out.y = (T.R.col1.y * v.x + T.R.col1.x * v.y) + T.position.y;
+		out.x = (T.R.col1.x * v.x + T.R.col2.x * v.y) + T.position.x;
+		out.y = (T.R.col1.y * v.x + T.R.col2.y * v.y) + T.position.y;
 	}
 }
 
