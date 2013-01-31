@@ -79,11 +79,21 @@ class B2PolyAndEdgeContact extends B2Contact
 	public override function reset(fixtureA:B2Fixture = null, fixtureB:B2Fixture = null):Void
 	{
 		//Has to be in reverse
-		super.reset(fixtureB, fixtureA);
+		if (Std.is(fixtureA.getShape(), B2PolygonShape))
+		{
+			super.reset(fixtureB, fixtureA);
+			
+			B2Settings.b2Assert(fixtureA.getType() == B2Shape.e_polygonShape);
+			B2Settings.b2Assert(fixtureB.getType() == B2Shape.e_edgeShape);	
+		}
 		
-		//This throws an error. If you try to comment them out, it dies on line 94 and mangles the shape.
-		//B2Settings.b2Assert(fixtureA.getType() == B2Shape.e_polygonShape);
-		//B2Settings.b2Assert(fixtureB.getType() == B2Shape.e_edgeShape);				
+		else
+		{
+			super.reset(fixtureA, fixtureB);
+			
+			B2Settings.b2Assert(fixtureA.getType() == B2Shape.e_edgeShape);
+			B2Settings.b2Assert(fixtureB.getType() == B2Shape.e_polygonShape);			
+		}			
 	}
 
 	public override function evaluate():Void
