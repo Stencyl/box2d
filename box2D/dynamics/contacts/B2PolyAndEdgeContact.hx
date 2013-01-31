@@ -78,9 +78,10 @@ class B2PolyAndEdgeContact extends B2Contact
 
 	public override function reset(fixtureA:B2Fixture = null, fixtureB:B2Fixture = null):Void
 	{
-		super.reset(fixtureA, fixtureB);
+		//Has to be in reverse
+		super.reset(fixtureB, fixtureA);
 		B2Settings.b2Assert(fixtureA.getType() == B2Shape.e_polygonShape);
-		B2Settings.b2Assert(fixtureB.getType() == B2Shape.e_edgeShape);
+		B2Settings.b2Assert(fixtureB.getType() == B2Shape.e_edgeShape);				
 	}
 
 	public override function evaluate():Void
@@ -89,8 +90,8 @@ class B2PolyAndEdgeContact extends B2Contact
 		var bB:B2Body = m_fixtureB.getBody();
 		
 		b2CollidePolyAndEdge(m_manifold,
-					cast(m_fixtureB.getShape(), B2EdgeShape), bB.m_xf,
-					cast(m_fixtureA.getShape(), B2PolygonShape), bA.m_xf);
+					cast(m_fixtureA.getShape(), B2EdgeShape), bA.m_xf,
+					cast(m_fixtureB.getShape(), B2PolygonShape), bB.m_xf);
 	}
 	
 	private function b2CollidePolyAndEdge(manifold:B2Manifold,
@@ -103,7 +104,6 @@ class B2PolyAndEdgeContact extends B2Contact
 		//m_xf = b2MulT(xfA, xfB);
         //m_centroidB = b2Mul(m_xf, polygonB->m_centroid);
         
-        //TODO: Suspicious?
 		multiplyTransformsInverse(xfA, xfB, m_xf);
         multiplyTransformVector(m_xf, polygonB.m_centroid, temp);
 		m_centroidB.setV(temp);
@@ -412,7 +412,6 @@ class B2PolyAndEdgeContact extends B2Contact
       	//Get polygonB in frameA
       	m_polygonB.count = polygonB.m_vertexCount;
       	
-      	//TODO: Suspicious?
       	for(i in 0...polygonB.m_vertexCount)
       	{
        		multiplyTransformVector(m_xf, polygonB.m_vertices[i], temp);
@@ -448,9 +447,6 @@ class B2PolyAndEdgeContact extends B2Contact
       		trace("polysep: " + polygonAxis.separation + " is > " + m_radius);
         	return;
      	}
-     	
-     	//Never gets past this point
-     	trace("pass!");
     	
     	//-----------------------------
     	
@@ -613,7 +609,6 @@ class B2PolyAndEdgeContact extends B2Contact
 
           		if(primaryAxis.type == Type.EDGE_A) 
           		{
-          			//TODO: This is definitely wrong but we never get this far anyways.
             		cp.m_localPoint = B2Math.mulXT(m_xf, clipPoints2[i].v);
             		cp.m_id.set(clipPoints2[i].id);
           		} 
