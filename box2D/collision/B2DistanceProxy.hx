@@ -61,6 +61,7 @@ class B2DistanceProxy
 			case B2Shape.e_edgeShape:
 			{
 				var edge:B2EdgeShape = cast (shape, B2EdgeShape);
+				m_vertices = new Array <B2Vec2> ();
 				m_vertices[0] = edge.m_v1;
 				m_vertices[1] = edge.m_v2;
 				m_count = 2;
