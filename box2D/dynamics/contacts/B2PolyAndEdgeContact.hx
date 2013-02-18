@@ -621,7 +621,7 @@ class B2PolyAndEdgeContact extends B2Contact
 
           		if(primaryAxis.type == Type.EDGE_A) 
           		{
-            		cp.m_localPoint = B2Math.mulXT(m_xf, clipPoints2[i].v);
+            		cp.m_localPoint.setV(B2Math.mulXT(m_xf, clipPoints2[i].v));
             		cp.m_id.set(clipPoints2[i].id);
           		} 
           	
