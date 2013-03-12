@@ -46,6 +46,10 @@ class B2PolyAndEdgeContact extends B2Contact
 	static var n:B2Vec2 = new B2Vec2();
 	static var rf:ReferenceFace = new ReferenceFace();
 	
+	static var mat:B2Mat22 = new B2Mat22();
+	static var temp1:B2Vec2 = new B2Vec2();
+	static var temp2:B2Vec2 = new B2Vec2();
+	
 	static var ie:Array<ClipVertex> = [new ClipVertex(), new ClipVertex()];
 	static var clipPoints1:Array<ClipVertex> = [new ClipVertex(), new ClipVertex()];
 	static var clipPoints2:Array<ClipVertex> = [new ClipVertex(), new ClipVertex()];
@@ -786,18 +790,15 @@ class B2PolyAndEdgeContact extends B2Contact
   	public function multiplyTransformsInverse(A:B2Transform, B:B2Transform, out:B2Transform):Void
 	{
         //b2MulT(A.q, B.q); Rotation * Rotation
-        var q = new B2Mat22();
-        multiplyRotationsInverse(A.R, B.R, q);
+        multiplyRotationsInverse(A.R, B.R, mat);
         
-        //b2MulT(A.q, B.p - A.p); Rotation * Vector
-        var temp1 = new B2Vec2();
-        var temp2 = new B2Vec2();
+        //b2MulT(A.q, B.p - A.p); Rotation * Vector        
         temp2.setV(B.position);
         temp2.subtract(A.position);
-        multiplyRotationVectorInverse(A.R, temp2, temp1);
-        
-        out.position = temp1;
-        out.R = q;
+        multiplyRotationVectorInverse(A.R, temp2, out.position);
+		
+        out.R.col1.setV(mat.col1);
+		out.R.col2.setV(mat.col2);
 	}
 	
 	public function multiplyRotationsInverse(q:B2Mat22, r:B2Mat22, out:B2Mat22)

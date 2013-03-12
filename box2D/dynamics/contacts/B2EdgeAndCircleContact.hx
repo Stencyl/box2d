@@ -42,6 +42,8 @@ class B2EdgeAndCircleContact extends B2Contact
 	static var temp2:B2Vec2 = new B2Vec2();
 	static var m_centroidB:B2Vec2 = new B2Vec2();
 	
+	static var mat:B2Mat22 = new B2Mat22();
+	
 	var m_v0:B2Vec2;
     var m_v1:B2Vec2;
 	var m_v2:B2Vec2;
@@ -286,18 +288,15 @@ class B2EdgeAndCircleContact extends B2Contact
 	public function multiplyTransformsInverse(A:B2Transform, B:B2Transform, out:B2Transform):Void
 	{
         //b2MulT(A.q, B.q); Rotation * Rotation
-        var q = new B2Mat22();
-        multiplyRotationsInverse(A.R, B.R, q);
+        multiplyRotationsInverse(A.R, B.R, mat);
         
-        //b2MulT(A.q, B.p - A.p); Rotation * Vector
-        var temp1 = new B2Vec2();
-        var temp2 = new B2Vec2();
+        //b2MulT(A.q, B.p - A.p); Rotation * Vector        
         temp2.setV(B.position);
         temp2.subtract(A.position);
-        multiplyRotationVectorInverse(A.R, temp2, temp1);
-        
-        out.position = temp1;
-        out.R = q;
+        multiplyRotationVectorInverse(A.R, temp2, out.position);
+		
+        out.R.col1.setV(mat.col1);
+		out.R.col2.setV(mat.col2);
 	}
 	
 	//TODO: Combine/Transfer to B2Math
