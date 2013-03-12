@@ -18,6 +18,7 @@
 
 package box2D.dynamics.contacts;
 
+import box2D.collision.B2ContactID;
 import box2D.collision.B2Manifold;
 import box2D.collision.B2ManifoldPoint;
 import box2D.collision.shapes.B2CircleShape;
@@ -26,12 +27,26 @@ import box2D.common.math.B2Transform;
 import box2D.common.math.B2Vec2;
 import box2D.common.math.B2Mat22;
 import box2D.common.math.B2Math;
+import box2D.common.B2Settings;
 import box2D.dynamics.B2Body;
 import box2D.dynamics.B2Fixture;
 import box2D.dynamics.contacts.B2Contact;
 
 class B2EdgeAndCircleContact extends B2Contact
 {
+	static var m_xf:B2Transform = new B2Transform();
+	static var q:B2Vec2 = new B2Vec2();
+	static var p:B2Vec2 = new B2Vec2();
+	static var e:B2Vec2 = new B2Vec2();
+	static var temp1:B2Vec2 = new B2Vec2();
+	static var temp2:B2Vec2 = new B2Vec2();
+	static var m_centroidB:B2Vec2 = new B2Vec2();
+	
+	var m_v0:B2Vec2;
+    var m_v1:B2Vec2;
+	var m_v2:B2Vec2;
+    var m_v3:B2Vec2;
+	
 	static public function create(allocator:Dynamic):B2Contact
 	{
 		return new B2EdgeAndCircleContact();
@@ -71,96 +86,244 @@ class B2EdgeAndCircleContact extends B2Contact
 	{
 		manifold.m_pointCount = 0;
 
-		var tPoint:B2ManifoldPoint;
-		var dX:Float = 0;
-		var dY:Float = 0;
-		var positionX:Float = 0;
-		var positionY:Float = 0;
-		var tVec:B2Vec2;
-		var tMat:B2Mat22;
+		// Compute circle in frame of edge
+		//b2Vec2 Q = b2MulT(xfA, b2Mul(xfB, circleB->m_p));	
+		multiplyTransformVector(xf2, circle.m_p, temp1);
+		q.setV(B2Math.mulXT(xf1, temp1));
 		
-		tMat = xf2.R;
-		tVec = circle.m_p;
+		//b2Vec2 A = edgeA->m_vertex1, B = edgeA->m_vertex2;
+		//b2Vec2 e = B - A;
+		m_v0 = edge.m_v0;
+		m_v1 = edge.m_v1;
+		m_v2 = edge.m_v2;
+		m_v3 = edge.m_v3;
 		
-		var cX = xf2.position.x + (tMat.col1.x * tVec.x + tMat.col2.x * tVec.y);
-		var cY = xf2.position.y + (tMat.col1.y * tVec.x + tMat.col2.y * tVec.y);
+		e.set(m_v2.x - m_v1.x, m_v2.y - m_v1.y);
 		
-		dX = cX - xf1.position.x;
-		dY = cY - xf1.position.y;
-		tMat = xf1.R;
+		//float32 u = b2Dot(e, B - Q);
+		//float32 v = b2Dot(e, Q - A);
+		temp1.set(m_v2.x - q.x, m_v2.y - q.y);
+		var u:Float = B2Math.dot(e, temp1);
 		
-		var cLocalX = (dX * tMat.col1.x + dY * tMat.col1.y);
-		var cLocalY = (dX * tMat.col2.x + dY * tMat.col2.y);
-		var dist:Float = 0;
+		temp1.set(q.x - m_v1.x, q.y - m_v1.y);
+		var v:Float = B2Math.dot(e, temp1);
+		
+		//float32 radius = edgeA->m_radius + circleB->m_radius;
 		var radius = edge.m_radius + circle.m_radius;
-		tVec = edge.m_normal;
-		var separation = tVec.x * dX + tVec.y * dY;
-		var v1 = edge.m_v1;
-		var v2 = edge.m_v2;
-		
-		if(separation < B2Math.MIN_VALUE) 
+				
+		// Region A
+		if (v <= 0.0)
 		{
+			//b2Vec2 P = A;
+			//b2Vec2 d = Q - P;
+			//float32 dd = b2Dot(d, d);
+			p.setV(m_v1);
+			temp1.set(q.x - p.x, q.y - p.y);
+			var dd:Float = B2Math.dot(temp1, temp1);		
+			
+			if (dd > radius * radius)
+			{
+				return;
+			}
+		
+			// Is there an edge connected to A?
+			if (edge.m_hasVertex0)
+			{
+				//b2Vec2 A1 = edgeA->m_vertex0;
+				//b2Vec2 B1 = A;
+				//b2Vec2 e1 = B1 - A1;
+				//float32 u1 = b2Dot(e1, B1 - Q);
+				temp1.set(m_v1.x - m_v0.x, m_v1.y - m_v0.y);
+				temp2.set(m_v1.x - q.x, m_v1.y - q.y);
+				var u1:Float = B2Math.dot(temp1, temp2);				
+			
+				// Is the circle in Region AB of the previous edge?
+				if (u1 > 0.0)
+				{
+					return;
+				}
+			}
+		
+			//cf.indexA = 0;
+			//cf.typeA = b2ContactFeature::e_vertex;
+			//manifold->pointCount = 1;
+			//manifold->type = b2Manifold::e_circles;
+			//manifold->localNormal.SetZero();
+			//manifold->localPoint = P;
+			//manifold->points[0].id.key = 0;
+			//manifold->points[0].id.cf = cf;
+			//manifold->points[0].localPoint = circleB->m_p;
+		
 			manifold.m_pointCount = 1;
-			manifold.m_type = B2Manifold.e_faceA;
-			manifold.m_localPlaneNormal.setV(edge.m_normal);
-			manifold.m_localPoint.x = 0.5 * (v1.x + v2.x);
-			manifold.m_localPoint.y = 0.5 * (v1.y + v2.y);
-			manifold.m_points[0].m_localPoint.setV(circle.m_p);
+			manifold.m_type = B2Manifold.e_circles;
+			manifold.m_localPlaneNormal.setZero();
+			manifold.m_localPoint.setV(p);
+			
 			manifold.m_points[0].m_id.key = 0;
+			manifold.m_points[0].m_id.indexA = 0;
+			manifold.m_points[0].m_id.indexB = 0;
+			manifold.m_points[0].m_id.typeA = B2ContactID.VERTEX; 
+			manifold.m_points[0].m_id.typeB = B2ContactID.VERTEX; 
+			manifold.m_points[0].m_localPoint.setV(circle.m_p);
+		
+			return;
+		}
+	
+		// Region B
+		if (u <= 0.0)
+		{
+			//b2Vec2 P = B;
+			//b2Vec2 d = Q - P;
+			//float32 dd = b2Dot(d, d);
+			p.setV(m_v2);
+			temp1.set(q.x - p.x, q.y - p.y);
+			var dd:Float = B2Math.dot(temp1, temp1);
+			
+			if (dd > radius * radius)
+			{
+				return;
+			}
+		
+			//Is there an edge connected to B?
+			if (edge.m_hasVertex3)
+			{
+				//b2Vec2 B2 = edgeA->m_vertex3;
+				//b2Vec2 A2 = B;
+				//b2Vec2 e2 = B2 - A2;
+				//float32 v2 = b2Dot(e2, Q - A2);
+			
+				temp1.set(m_v3.x - m_v2.x, m_v3.y - m_v2.y);
+				temp2.set(q.x - m_v2.x, q.y - m_v2.y);
+				var v2:Float = B2Math.dot(temp1, temp2);
+								
+				// Is the circle in Region AB of the next edge?
+				if (v2 > 0.0)
+				{
+					return;
+				}
+			}
+			
+			//cf.indexA = 1;
+			//cf.typeA = b2ContactFeature::e_vertex;
+			//manifold->pointCount = 1;
+			//manifold->type = b2Manifold::e_circles;
+			//manifold->localNormal.SetZero();
+			//manifold->localPoint = P;
+			//manifold->points[0].id.key = 0;
+			//manifold->points[0].id.cf = cf;
+			//manifold->points[0].localPoint = circleB->m_p;
+			//return;
+		
+			manifold.m_pointCount = 1;
+			manifold.m_type = B2Manifold.e_circles;
+			manifold.m_localPlaneNormal.setZero();
+			manifold.m_localPoint.setV(p);
+			
+			manifold.m_points[0].m_id.key = 0;
+			manifold.m_points[0].m_id.indexA = 1;
+			manifold.m_points[0].m_id.indexB = 0;
+			manifold.m_points[0].m_id.typeA = B2ContactID.VERTEX; 
+			manifold.m_points[0].m_id.typeB = B2ContactID.VERTEX; 
+			manifold.m_points[0].m_localPoint.setV(circle.m_p);
+
 			return;
 		}
 		
-		var u1:Float = (cLocalX - v1.x) * (v2.x - v1.x) + (cLocalY - v1.y) * (v2.y - v1.y);
-		var u2:Float = (cLocalX - v2.x) * (v1.x - v2.x) + (cLocalY - v2.y) * (v1.y - v2.y);
+		// Region AB
+		//float32 den = b2Dot(e, e);
+		//b2Assert(den > 0.0f);
+		var den:Float = B2Math.dot(e, e);
+		B2Settings.b2Assert(den > 0.0);
+	
+		//b2Vec2 P = (1.0f / den) * (u * A + v * B);
+		//b2Vec2 d = Q - P;
+		//float32 dd = b2Dot(d, d);
+		p.x = (m_v1.x * u + m_v2.x * v) * (1.0 / den);
+		p.y = (m_v1.y * u + m_v2.y * v) * (1.0 / den);
+		temp1.x = q.x - p.x;
+		temp1.y = q.y - p.y;
+		var dd:Float = B2Math.dot(temp1, temp1);
 		
-		if(u1 <= 0.0) 
+		if (dd > radius * radius)
 		{
-			if ((cLocalX - v1.x) * (cLocalX - v1.x) + (cLocalY - v1.y) * (cLocalY - v1.y) > radius * radius) 
-				return;
-			
-			manifold.m_pointCount = 1;
-			manifold.m_type = B2Manifold.e_faceA;
-			manifold.m_localPlaneNormal.x = cLocalX - v1.x;
-			manifold.m_localPlaneNormal.y = cLocalY - v1.y;
-			manifold.m_localPlaneNormal.normalize();
-			manifold.m_localPoint.setV(v1);
-			manifold.m_points[0].m_localPoint.setV(circle.m_p);
-			manifold.m_points[0].m_id.key = 0;
+			return;
 		}
 		
-		else if(u2 <= 0) 
+		//b2Vec2 n(-e.y, e.x);
+		temp1.set( -e.y, e.x);
+		temp2.set(q.x - m_v1.x, q.y - m_v1.y);
+		
+		if (B2Math.dot(temp1,temp2) < 0.0)
 		{
-			if((cLocalX - v2.x) * (cLocalX - v2.x) + (cLocalY - v2.y) * (cLocalY - v2.y) > radius * radius) 
-				return;
-			
-			manifold.m_pointCount = 1;
-			manifold.m_type = B2Manifold.e_faceA;
-			manifold.m_localPlaneNormal.x = cLocalX - v2.x;
-			manifold.m_localPlaneNormal.y = cLocalY - v2.y;
-			manifold.m_localPlaneNormal.normalize();
-			manifold.m_localPoint.setV(v2);
-			manifold.m_points[0].m_localPoint.setV(circle.m_p);
-			manifold.m_points[0].m_id.key = 0;
+			temp1.negativeSelf();
 		}
 		
-		else 
-		{
-			var faceCenterX:Float = 0.5 * (v1.x + v2.x);
-			var faceCenterY:Float = 0.5 * (v1.y + v2.y);
+		temp1.normalize();
+	
+		//cf.indexA = 0;
+		//cf.typeA = b2ContactFeature::e_face;
+		//manifold->pointCount = 1;
+		//manifold->type = b2Manifold::e_faceA;
+		//manifold->localNormal = n;
+		//manifold->localPoint = A;
+		//manifold->points[0].id.key = 0;
+		//manifold->points[0].id.cf = cf;
+		//manifold->points[0].localPoint = circleB->m_p;
+	
+		manifold.m_pointCount = 1;
+		manifold.m_type = B2Manifold.e_faceA;
+		manifold.m_localPlaneNormal.setV(temp1);
+		manifold.m_localPoint.setV(m_v1);
 			
-			separation = (cLocalX - faceCenterX) * tVec.x + (cLocalY - faceCenterY) * tVec.y;
-			
-			if(separation > radius) 
-				return;
-			
-			manifold.m_pointCount = 1;
-			manifold.m_type = B2Manifold.e_faceA;
-			manifold.m_localPlaneNormal.x = tVec.x;
-			manifold.m_localPlaneNormal.y = tVec.y;
-			manifold.m_localPlaneNormal.normalize();
-			manifold.m_localPoint.set(faceCenterX, faceCenterY);
-			manifold.m_points[0].m_localPoint.setV(circle.m_p);
-			manifold.m_points[0].m_id.key = 0;
-		}
+		manifold.m_points[0].m_id.key = 0;
+		manifold.m_points[0].m_id.indexA = 0;
+		manifold.m_points[0].m_id.indexB = 0;
+		manifold.m_points[0].m_id.typeA = B2ContactID.FACE; 
+		manifold.m_points[0].m_id.typeB = B2ContactID.VERTEX; 
+		manifold.m_points[0].m_localPoint.setV(circle.m_p);				
+	}
+	
+	public function multiplyTransformsInverse(A:B2Transform, B:B2Transform, out:B2Transform):Void
+	{
+        //b2MulT(A.q, B.q); Rotation * Rotation
+        var q = new B2Mat22();
+        multiplyRotationsInverse(A.R, B.R, q);
+        
+        //b2MulT(A.q, B.p - A.p); Rotation * Vector
+        var temp1 = new B2Vec2();
+        var temp2 = new B2Vec2();
+        temp2.setV(B.position);
+        temp2.subtract(A.position);
+        multiplyRotationVectorInverse(A.R, temp2, temp1);
+        
+        out.position = temp1;
+        out.R = q;
+	}
+	
+	//TODO: Combine/Transfer to B2Math
+	public function multiplyRotationsInverse(q:B2Mat22, r:B2Mat22, out:B2Mat22)
+	{		
+		out.col1.x = q.col1.x * r.col1.x + q.col1.y * r.col1.y;
+		out.col1.y = q.col2.x * r.col1.x + q.col2.y * r.col1.y;
+		out.col2.x = q.col1.x * r.col2.x + q.col1.y * r.col2.y;
+		out.col2.y = q.col2.x * r.col2.x + q.col2.y * r.col2.y;
+	}
+	
+	private function multiplyRotationVector(q:B2Mat22, v:B2Vec2, out:B2Vec2):Void
+	{
+		out.x = q.col1.x * v.x + q.col2.x * v.y;
+		out.y = q.col1.y * v.x + q.col2.y * v.y;
+	}
+	
+	private function multiplyRotationVectorInverse(q:B2Mat22, v:B2Vec2, out:B2Vec2):Void
+	{		
+		out.x = q.col1.x * v.x + q.col1.y * v.y;
+		out.y = q.col2.x * v.x + q.col2.y * v.y;
+	}
+	
+	private function multiplyTransformVector(T:B2Transform, v:B2Vec2, out:B2Vec2):Void
+	{
+		out.x = (T.R.col1.x * v.x + T.R.col2.x * v.y) + T.position.x;
+		out.y = (T.R.col1.y * v.x + T.R.col2.y * v.y) + T.position.y;
 	}
 }
