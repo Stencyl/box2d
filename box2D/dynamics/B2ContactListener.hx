@@ -40,7 +40,7 @@ import com.stencyl.models.Terrain;
  */
 class B2ContactListener
 {
-	
+	private static var KEY_LOCK:Int = 0;
 	public function new () {
 		
 		
@@ -52,8 +52,13 @@ class B2ContactListener
 	 */
 	public function beginContact(contact:B2Contact):Void 
 	{
-		var time = nme.Lib.getTimer();
-		contact.key = time;
+		//5000 seems reasonable time to reset
+		if (KEY_LOCK > 5000)
+		{
+			KEY_LOCK = 0;
+		}
+		
+		contact.key = KEY_LOCK++;
 
 		var a1 = cast(contact.getFixtureA().getUserData(), Actor);
 		var a2 = cast(contact.getFixtureB().getUserData(), Actor);
