@@ -198,6 +198,12 @@ class B2Vec2
 
 	public static function getFromPool():B2Vec2 
 	{
+		//limit to 500
+		if (pooli > 500)
+		{
+			pooli = 0;
+		}
+		
 		if(pooli < pool.length)
 		{
 			var contact:B2Vec2 = pool[pooli];
