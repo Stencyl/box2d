@@ -47,21 +47,28 @@ class B2ContactFactory
 		
 		m_registers[type1][type2].createFcn = createFcn;
 		m_registers[type1][type2].destroyFcn = destroyFcn;
-		m_registers[type1][type2].primary = true;
-		
-		if (type1 != type2)
-		{
-			m_registers[type2][type1].createFcn = createFcn;
-			m_registers[type2][type1].destroyFcn = destroyFcn;
-			m_registers[type2][type1].primary = false;
-		}
+		m_registers[type1][type2].primary = type1;		
 	}
 	public function initializeRegisters() : Void{
 		m_registers = new Array <Array <B2ContactRegister> > ();
 		for (i in 0...B2Shape.e_shapeTypeCount){
 			m_registers[i] = new Array <B2ContactRegister> ();
 			for (j in 0...B2Shape.e_shapeTypeCount){
-				m_registers[i][j] = new B2ContactRegister();
+				m_registers[i][j] = null;
+			}
+		}
+		
+		for (i in 0...B2Shape.e_shapeTypeCount){
+			for (j in 0...B2Shape.e_shapeTypeCount) {
+				if (m_registers[i][j] == null)
+				{
+					m_registers[i][j] = new B2ContactRegister();
+				
+					if (i != j)
+					{
+						m_registers[j][i] = m_registers[i][j];
+					}
+				}
 			}
 		}
 		
@@ -89,14 +96,23 @@ class B2ContactFactory
 			c = reg.pool;
 			reg.pool = c.m_next;
 			reg.poolCount--;
-			c.reset(fixtureA, fixtureB);
-			return c;
+			
+			if (reg.primary == type1)
+			{
+				c.reset(fixtureA, fixtureB);
+				return c;
+			}
+			else
+			{
+				c.reset(fixtureB, fixtureA);			
+				return c;
+			}
 		}
 		
 		var createFcn:Dynamic = reg.createFcn;
 		if (createFcn != null)
 		{
-			if (reg.primary)
+			if (reg.primary == type1)
 			{
 				c = createFcn(m_allocator);
 				c.reset(fixtureA, fixtureB);

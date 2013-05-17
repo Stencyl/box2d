@@ -27,7 +27,7 @@ class B2ContactRegister
 	public function new () { }
 	public var createFcn:Dynamic; // fcn pointer
 	public var destroyFcn:Dynamic;// fcn pointer
-	public var primary:Bool;
+	public var primary:Int;
 	public var pool:B2Contact;
 	public var poolCount:Int;
 }
