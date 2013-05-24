@@ -1006,13 +1006,13 @@ class B2World
 		var seed:B2Body = m_bodyList;
 		while (seed != null)
 		{
-			if ((seed.m_flags & B2Body.e_islandFlag) != 0)
+			if ((seed.m_flags & B2Body.e_islandFlag) != 0 || seed.isRecycled())
 			{
 				seed = seed.m_next;
 				continue;
 			}
 			
-			//STENCYL
+			//STENCYL			
 			if(!seed.isActive() && !seed.isAlwaysActive() && (seed.m_xf.position.x + seed.origin.x + seed.size.x >= m_aabb.lowerBound.x ||
 									 seed.m_xf.position.y + seed.origin.y + seed.size.y >= m_aabb.lowerBound.y ||
 									 seed.m_xf.position.x + seed.origin.x <= m_aabb.upperBound.x ||
