@@ -1006,7 +1006,7 @@ class B2World
 		var seed:B2Body = m_bodyList;
 		while (seed != null)
 		{
-			if ((seed.m_flags & B2Body.e_islandFlag) != 0 || seed.isRecycled())
+			if ((seed.m_flags & B2Body.e_islandFlag) != 0)
 			{
 				seed = seed.m_next;
 				continue;
@@ -1688,7 +1688,7 @@ class B2World
 
 	public var m_contactList:B2Contact;
 
-	private var m_bodyCount:Int;
+	public var m_bodyCount:Int;
 	public var m_contactCount:Int;
 	private var m_jointCount:Int;
 	private var m_controllerList:B2Controller;

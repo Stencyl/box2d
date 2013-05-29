@@ -1210,25 +1210,7 @@ class B2Body
 	{
 		return (m_flags & e_pausedFlag) == e_pausedFlag;
 	}
-	
-	public function setRecycled(flag:Bool) 
-	{
-		if(flag) 
-		{
-			m_flags |= e_recycledFlag;
-		}
-		
-		else 
-		{
-			m_flags &= ~e_recycledFlag;
-		}
-	}
-	
-	public function isRecycled():Bool
-	{
-		return (m_flags & e_recycledFlag) == e_recycledFlag;
-	}	
-	
+			
 	public function setIgnoreGravity(flag:Bool) {
 		if(flag) {
 			m_flags |= e_ignoreGravityFlag;
@@ -1507,7 +1489,6 @@ class B2Body
 		static public var e_ignoreGravityFlag:Int   = 0x0080;
 		static public var e_alwaysActiveFlag:Int    = 0x0100;
 		static public var e_pausedFlag:Int          = 0x0200;
-		static public var e_recycledFlag:Int        = 0x0400;
 	//};
 
 	// m_type
