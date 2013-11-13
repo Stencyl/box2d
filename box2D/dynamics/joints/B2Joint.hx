@@ -107,65 +107,61 @@ class B2Joint
 	static public function create(def:B2JointDef, allocator:Dynamic):B2Joint{
 		var joint:B2Joint = null;
 		
-		switch (def.type)
-		{
-		case e_distanceJoint:
+
+		if(def.type == e_distanceJoint)
 			{
 				//void* mem = allocator->Allocate(sizeof(b2DistanceJoint));
 				joint = new B2DistanceJoint(cast (def, B2DistanceJointDef));
 			}
 		
-		case e_mouseJoint:
+		else if(def.type == e_mouseJoint)
 			{
 				//void* mem = allocator->Allocate(sizeof(b2MouseJoint));
 				joint = new B2MouseJoint(cast (def, B2MouseJointDef));
 			}
 		
-		case e_prismaticJoint:
+		else if(def.type == e_prismaticJoint)
 			{
 				//void* mem = allocator->Allocate(sizeof(b2PrismaticJoint));
 				joint = new B2PrismaticJoint(cast (def, B2PrismaticJointDef));
 			}
 		
-		case e_revoluteJoint:
+		else if(def.type == e_revoluteJoint)
 			{
 				//void* mem = allocator->Allocate(sizeof(b2RevoluteJoint));
 				joint = new B2RevoluteJoint(cast (def, B2RevoluteJointDef));
 			}
 		
-		case e_pulleyJoint:
+		else if(def.type == e_pulleyJoint)
 			{
 				//void* mem = allocator->Allocate(sizeof(b2PulleyJoint));
 				joint = new B2PulleyJoint(cast (def, B2PulleyJointDef));
 			}
 		
-		case e_gearJoint:
+		else if(def.type == e_gearJoint)
 			{
 				//void* mem = allocator->Allocate(sizeof(b2GearJoint));
 				joint = new B2GearJoint(cast (def, B2GearJointDef));
 			}
 		
-		case e_lineJoint:
+		else if(def.type == e_lineJoint)
 			{
 				//void* mem = allocator->Allocate(sizeof(b2LineJoint));
 				joint = new B2LineJoint(cast (def, B2LineJointDef));
 			}
 			
-		case e_weldJoint:
+		else if(def.type == e_weldJoint)
 			{
 				//void* mem = allocator->Allocate(sizeof(b2WeldJoint));
 				joint = new B2WeldJoint(cast (def, B2WeldJointDef));
 			}
 			
-		case e_frictionJoint:
+		else if(def.type == e_frictionJoint)
 			{
 				//void* mem = allocator->Allocate(sizeof(b2FrictionJoint));
 				joint = new B2FrictionJoint(cast (def, B2FrictionJointDef));
 			}
 			
-		default:
-			//b2Settings.b2Assert(false);
-		}
 		
 		return joint;
 	}

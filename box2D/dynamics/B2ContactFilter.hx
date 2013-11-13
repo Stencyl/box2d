@@ -61,6 +61,8 @@ class B2ContactFilter
 			return true;
 		}
 		
+		//trace(g1 + " hit " + g2 + " = " + com.stencyl.models.GameModel.collisionMap[g1][g2]);
+	
 		return com.stencyl.models.GameModel.collisionMap[g1][g2];
 	}
 	

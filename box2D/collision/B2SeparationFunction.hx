@@ -268,52 +268,56 @@ class B2SeparationFunction
 		var pointB:B2Vec2;
 		var seperation:Float;
 		var normal:B2Vec2;
-		switch(m_type)
+			
+		if(m_type == e_points)
 		{
-			case e_points:
-			{
-				axisA = B2Math.mulTMV(transformA.R, m_axis);
-				axisB = B2Math.mulTMV(transformB.R, m_axis.getNegative());
-				localPointA = m_proxyA.getSupportVertex(axisA);
-				localPointB = m_proxyB.getSupportVertex(axisB);
-				pointA = B2Math.mulX(transformA, localPointA, true);
-				pointB = B2Math.mulX(transformB, localPointB, true);
-				//float32 separation = b2Dot(pointB - pointA, m_axis);
-				seperation = (pointB.x - pointA.x) * m_axis.x + (pointB.y - pointA.y) * m_axis.y;
-				return seperation;
-			}
-			case e_faceA:
-			{
-				normal = B2Math.mulMV(transformA.R, m_axis);
-				pointA = B2Math.mulX(transformA, m_localPoint, true);
-				
-				axisB = B2Math.mulTMV(transformB.R, normal.getNegative());
-				
-				localPointB = m_proxyB.getSupportVertex(axisB);
-				pointB = B2Math.mulX(transformB, localPointB, true);
-				
-				//float32 separation = b2Dot(pointB - pointA, normal);
-				seperation = (pointB.x - pointA.x) * normal.x + (pointB.y - pointA.y) * normal.y;
-				return seperation;
-			}
-			case e_faceB:
-			{
-				normal = B2Math.mulMV(transformB.R, m_axis);
-				pointB = B2Math.mulX(transformB, m_localPoint, true);
-				
-				axisA = B2Math.mulTMV(transformA.R, normal.getNegative());
-				
-				localPointA = m_proxyA.getSupportVertex(axisA);
-				pointA = B2Math.mulX(transformA, localPointA, true);
-				
-				//float32 separation = b2Dot(pointA - pointB, normal);
-				seperation = (pointA.x - pointB.x) * normal.x + (pointA.y - pointB.y) * normal.y;
-				return seperation;
-			}
-			default:
+			axisA = B2Math.mulTMV(transformA.R, m_axis);
+			axisB = B2Math.mulTMV(transformB.R, m_axis.getNegative());
+			localPointA = m_proxyA.getSupportVertex(axisA);
+			localPointB = m_proxyB.getSupportVertex(axisB);
+			pointA = B2Math.mulX(transformA, localPointA, true);
+			pointB = B2Math.mulX(transformB, localPointB, true);
+			//float32 separation = b2Dot(pointB - pointA, m_axis);
+			seperation = (pointB.x - pointA.x) * m_axis.x + (pointB.y - pointA.y) * m_axis.y;
+			return seperation;
+		}
+		
+		else if(m_type == e_faceA)
+		{
+			normal = B2Math.mulMV(transformA.R, m_axis);
+			pointA = B2Math.mulX(transformA, m_localPoint, true);
+			
+			axisB = B2Math.mulTMV(transformB.R, normal.getNegative());
+			
+			localPointB = m_proxyB.getSupportVertex(axisB);
+			pointB = B2Math.mulX(transformB, localPointB, true);
+			
+			//float32 separation = b2Dot(pointB - pointA, normal);
+			seperation = (pointB.x - pointA.x) * normal.x + (pointB.y - pointA.y) * normal.y;
+			return seperation;
+		}
+		
+		else if(m_type == e_faceB)
+		{
+			normal = B2Math.mulMV(transformB.R, m_axis);
+			pointB = B2Math.mulX(transformB, m_localPoint, true);
+			
+			axisA = B2Math.mulTMV(transformA.R, normal.getNegative());
+			
+			localPointA = m_proxyA.getSupportVertex(axisA);
+			pointA = B2Math.mulX(transformA, localPointA, true);
+			
+			//float32 separation = b2Dot(pointA - pointB, normal);
+			seperation = (pointA.x - pointB.x) * normal.x + (pointA.y - pointB.y) * normal.y;
+			return seperation;
+		}
+		
+		else
+		{
 			B2Settings.b2Assert(false);
 			return 0.0;
 		}
+	
 	}
 	
 	
