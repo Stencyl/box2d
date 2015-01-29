@@ -189,7 +189,7 @@ class B2Vec2
 	}
 	
 	public static var pool:Array<B2Vec2> = new Array<B2Vec2>();
-	public static var pooli:Int;
+	public static var pooli:Int = 0;
 	
 	public static function freePool() 
 	{
