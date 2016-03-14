@@ -58,7 +58,10 @@ class B2ContactFilter
 		//REGION ID
 		if(g1 == -2 || g2 == -2)
 		{
-			return true;
+			if(g1 == 1 || g2 == 1) //TERRAIN ID
+				return false;
+			else
+				return true;
 		}
 		
 		//trace(g1 + " hit " + g2 + " = " + com.stencyl.models.GameModel.collisionMap[g1][g2]);
