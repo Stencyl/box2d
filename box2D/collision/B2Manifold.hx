@@ -87,7 +87,7 @@ class B2Manifold
 	public var m_pointCount:Int;
 	
 	//enum Type
-	public static var e_circles:Int = 0x0001;
-	public static var e_faceA:Int = 0x0002;
-	public static var e_faceB:Int = 0x0004;
+	public static inline var e_circles:Int = 0x0001;
+	public static inline var e_faceA:Int = 0x0002;
+	public static inline var e_faceB:Int = 0x0004;
 }

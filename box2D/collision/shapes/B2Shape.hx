@@ -175,20 +175,20 @@ class B2Shape
 	*/
 	//enum b2ShapeType
 	//{
-		static public var e_unknownShape:Int = 	-1;
-		static public var e_circleShape:Int = 	0;
-		static public var e_polygonShape:Int = 	1;
-		static public var e_edgeShape:Int =       2;
-		static public var e_shapeTypeCount:Int = 	3;
+		static public inline var e_unknownShape:Int =	-1;
+		static public inline var e_circleShape:Int =	0;
+		static public inline var e_polygonShape:Int =	1;
+		static public inline var e_edgeShape:Int =		2;
+		static public inline var e_shapeTypeCount:Int =	3;
 	//};
 	
 	/**
 	 * Possible return values for TestSegment
 	 */
 		/** Return value for TestSegment indicating a hit. */
-		static public var e_hitCollide:Int = 1;
+		static public inline var e_hitCollide:Int = 1;
 		/** Return value for TestSegment indicating a miss. */
-		static public var e_missCollide:Int = 0;
+		static public inline var e_missCollide:Int = 0;
 		/** Return value for TestSegment indicating that the segment starting point, p1, is already inside the shape. */
-		static public var e_startsInsideCollide:Int = -1;
+		static public inline var e_startsInsideCollide:Int = -1;
 }

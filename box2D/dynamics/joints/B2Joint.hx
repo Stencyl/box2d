@@ -263,22 +263,22 @@ class B2Joint
 	// ENUMS
 	
 	// enum b2JointType
-	static public var e_unknownJoint:Int = 0;
-	static public var e_revoluteJoint:Int = 1;
-	static public var e_prismaticJoint:Int = 2;
-	static public var e_distanceJoint:Int = 3;
-	static public var e_pulleyJoint:Int = 4;
-	static public var e_mouseJoint:Int = 5;
-	static public var e_gearJoint:Int = 6;
-	static public var e_lineJoint:Int = 7;
-	static public var e_weldJoint:Int = 8;
-	static public var e_frictionJoint:Int = 9;
+	static public inline var e_unknownJoint:Int = 0;
+	static public inline var e_revoluteJoint:Int = 1;
+	static public inline var e_prismaticJoint:Int = 2;
+	static public inline var e_distanceJoint:Int = 3;
+	static public inline var e_pulleyJoint:Int = 4;
+	static public inline var e_mouseJoint:Int = 5;
+	static public inline var e_gearJoint:Int = 6;
+	static public inline var e_lineJoint:Int = 7;
+	static public inline var e_weldJoint:Int = 8;
+	static public inline var e_frictionJoint:Int = 9;
 
 	// enum b2LimitState
-	static public var e_inactiveLimit:Int = 0;
-	static public var e_atLowerLimit:Int = 1;
-	static public var e_atUpperLimit:Int = 2;
-	static public var e_equalLimits:Int = 3;
+	static public inline var e_inactiveLimit:Int = 0;
+	static public inline var e_atLowerLimit:Int = 1;
+	static public inline var e_atUpperLimit:Int = 2;
+	static public inline var e_equalLimits:Int = 3;
 	
 	//Stencyl
 	public var ID:Int;
