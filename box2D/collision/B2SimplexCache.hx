@@ -39,4 +39,6 @@ class B2SimplexCache
 	public var indexA:Array <Int>;	
 	/** Vertices on shape b */	
 	public var indexB:Array <Int>;	
+
+	public var useCache:Bool = false;
 }

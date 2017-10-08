@@ -53,29 +53,33 @@ public function readCache(cache:B2SimplexCache,
 	m_count = cache.count;
 	var vertices:Array <B2SimplexVertex> = m_vertices;
 	var v:B2SimplexVertex;
-	for (i in 0...m_count)
+	if(cache.useCache)
 	{
-		v = vertices[i];
-		v.indexA = cache.indexA[i];
-		v.indexB = cache.indexB[i];
-		wALocal = proxyA.getVertex(v.indexA);
-		wBLocal = proxyB.getVertex(v.indexB);
-		v.wA = B2Math.mulX(transformA, wALocal, true);
-		v.wB = B2Math.mulX(transformB, wBLocal, true);
-		v.w = B2Math.subtractVVPooled(v.wB, v.wA);
-		v.a = 0;
-	}
-	
-	// Compute the new simplex metric, if it substantially different than
-	// old metric then flush the simplex
-	if (m_count > 1)
-	{
-		var metric1:Float = cache.metric;
-		var metric2:Float = getMetric();
-		if (metric2 < .5 * metric1 || 2.0 * metric1 < metric2 || metric2 < B2Math.MIN_VALUE)
+		for (i in 0...m_count)
 		{
-			// Reset the simplex
-			m_count = 0;
+			v = vertices[i];
+			v.indexA = cache.indexA[i];
+			v.indexB = cache.indexB[i];
+			wALocal = proxyA.getVertex(v.indexA);
+			wBLocal = proxyB.getVertex(v.indexB);
+			v.wA = B2Math.mulX(transformA, wALocal, true);
+			v.wB = B2Math.mulX(transformB, wBLocal, true);
+			v.w = B2Math.subtractVVPooled(v.wB, v.wA);
+			v.a = 0;
+		}
+
+	
+		// Compute the new simplex metric, if it substantially different than
+		// old metric then flush the simplex
+		if (m_count > 1)
+		{
+			var metric1:Float = cache.metric;
+			var metric2:Float = getMetric();
+			if (metric2 < .5 * metric1 || 2.0 * metric1 < metric2 || metric2 < B2Math.MIN_VALUE)
+			{
+				// Reset the simplex
+				m_count = 0;
+			}
 		}
 	}
 	
@@ -96,13 +100,16 @@ public function readCache(cache:B2SimplexCache,
 
 public function writeCache(cache:B2SimplexCache):Void
 {
-	cache.metric = getMetric();
-	cache.count = Std.int (m_count);
-	var vertices:Array <B2SimplexVertex> = m_vertices;
-	for (i in 0...m_count)
+	if(cache.useCache)
 	{
-		cache.indexA[i] = Std.int(vertices[i].indexA);
-		cache.indexB[i] = Std.int(vertices[i].indexB);
+		cache.metric = getMetric();
+		cache.count = m_count;
+		var vertices:Array <B2SimplexVertex> = m_vertices;
+		for (i in 0...m_count)
+		{
+			cache.indexA[i] = vertices[i].indexA;
+			cache.indexB[i] = vertices[i].indexB;
+		}
 	}
 }
 

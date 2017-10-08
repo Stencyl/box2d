@@ -37,7 +37,7 @@ class B2TimeOfImpact
 	private static var b2_toiRootIters:Int = 0;
 	private static var b2_toiMaxRootIters:Int = 0;
 
-	private static var s_cache:B2SimplexCache = new B2SimplexCache();
+	private static var s_cache:B2SimplexCache = {var c = new B2SimplexCache(); c.useCache = true; c;}
 	private static var s_distanceInput:B2DistanceInput = new B2DistanceInput();
 	private static var s_xfA:B2Transform = new B2Transform();
 	private static var s_xfB:B2Transform = new B2Transform();

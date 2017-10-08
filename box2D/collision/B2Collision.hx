@@ -417,7 +417,7 @@ class B2Collision{
 		var local_v11:B2Vec2 = vertices1[edge1];
 		var local_v12:B2Vec2;
 		if (edge1 + 1 < count1) {
-			local_v12 = vertices1[Std.int(edge1+1)];
+			local_v12 = vertices1[edge1+1];
 		} else {
 			local_v12 = vertices1[0];
 		}

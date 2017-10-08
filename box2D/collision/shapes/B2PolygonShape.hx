@@ -66,7 +66,7 @@ class B2PolygonShape extends B2Shape
 	 * Copy vertices. This assumes the vertices define a convex polygon.
 	 * It is assumed that the exterior is the the right of each edge.
 	 */
-	public function setAsArray(vertices:Array <Dynamic>, vertexCount:Float = 0):Void
+	public function setAsArray(vertices:Array <Dynamic>, vertexCount:Int = 0):Void
 	{
 		var v:Array <B2Vec2> = new Array <B2Vec2>();
 		for (tVec in vertices)
@@ -76,7 +76,7 @@ class B2PolygonShape extends B2Shape
 		setAsVector(v, vertexCount);
 	}
 	
-	public static function asArray(vertices:Array <Dynamic>, vertexCount:Float):B2PolygonShape
+	public static function asArray(vertices:Array <Dynamic>, vertexCount:Int):B2PolygonShape
 	{
 		var polygonShape:B2PolygonShape = new B2PolygonShape();
 		polygonShape.setAsArray(vertices, vertexCount);
@@ -87,15 +87,15 @@ class B2PolygonShape extends B2Shape
 	 * Copy vertices. This assumes the vertices define a convex polygon.
 	 * It is assumed that the exterior is the the right of each edge.
 	 */
-	public function setAsVector(vertices:Array <B2Vec2>, vertexCount:Float = 0):Void
+	public function setAsVector(vertices:Array <B2Vec2>, vertexCount:Int = 0):Void
 	{
 		if (vertexCount == 0)
 			vertexCount = vertices.length;
 			
 		B2Settings.b2Assert(2 <= vertexCount);
-		m_vertexCount = Std.int (vertexCount);
+		m_vertexCount = vertexCount;
 		
-		reserve(Std.int (vertexCount));
+		reserve(vertexCount);
 		
 		var i:Int;
 		
@@ -120,7 +120,7 @@ class B2PolygonShape extends B2Shape
 		m_centroid = computeCentroid(m_vertices, m_vertexCount);
 	}
 	
-	public static function asVector(vertices:Array <B2Vec2>, vertexCount:Float):B2PolygonShape
+	public static function asVector(vertices:Array <B2Vec2>, vertexCount:Int):B2PolygonShape
 	{
 		var polygonShape:B2PolygonShape = new B2PolygonShape();
 		polygonShape.setAsVector(vertices, vertexCount);
