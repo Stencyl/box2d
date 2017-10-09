@@ -1015,10 +1015,14 @@ class B2World
 			}
 			
 			//STENCYL			
-			if(!seed.isActive() && !seed.isAlwaysActive() && (seed.m_xf.position.x + seed.origin.x + seed.size.x >= m_aabb.lowerBound.x ||
-									 seed.m_xf.position.y + seed.origin.y + seed.size.y >= m_aabb.lowerBound.y ||
-									 seed.m_xf.position.x + seed.origin.x <= m_aabb.upperBound.x ||
-									 seed.m_xf.position.y + seed.origin.y <= m_aabb.upperBound.y))
+			if(!seed.isActive() && !seed.isAlwaysActive() &&
+				(
+					seed.m_xf.position.x + seed.origin.x + seed.size.x >= m_aabb.lowerBound.x &&
+					seed.m_xf.position.y + seed.origin.y + seed.size.y >= m_aabb.lowerBound.y &&
+					seed.m_xf.position.x + seed.origin.x <= m_aabb.upperBound.x &&
+					seed.m_xf.position.y + seed.origin.y <= m_aabb.upperBound.y
+				)
+			)
 			{
 				seed.setActive(true);
 				seed.setAwake(true);
@@ -1039,10 +1043,14 @@ class B2World
 			}
 			
 			//STENCYL
-			if(seed.isActive() && !seed.isAlwaysActive() && (seed.m_xf.position.x + seed.origin.x + seed.size.x <= m_aabb.lowerBound.x ||
-									seed.m_xf.position.y + seed.origin.y + seed.size.y <= m_aabb.lowerBound.y ||
-									seed.m_xf.position.x + seed.origin.x >= m_aabb.upperBound.x ||
-									seed.m_xf.position.y + seed.origin.y >= m_aabb.upperBound.y))
+			if(seed.isActive() && !seed.isAlwaysActive() &&
+				(
+					seed.m_xf.position.x + seed.origin.x + seed.size.x < m_aabb.lowerBound.x ||
+					seed.m_xf.position.y + seed.origin.y + seed.size.y < m_aabb.lowerBound.y ||
+					seed.m_xf.position.x + seed.origin.x > m_aabb.upperBound.x ||
+					seed.m_xf.position.y + seed.origin.y > m_aabb.upperBound.y
+				)
+			)
 			{
 				seed.setAwake(false);
 				seed.setActive(false);
