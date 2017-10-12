@@ -271,8 +271,8 @@ class B2SeparationFunction
 			
 		if(m_type == e_points)
 		{
-			axisA = B2Math.mulTMV(transformA.R, m_axis);
-			axisB = B2Math.mulTMV(transformB.R, m_axis.getNegative());
+			axisA = B2Math.mulTMV(transformA.R, m_axis, true);
+			axisB = B2Math.mulTMV(transformB.R, m_axis.getNegativePooled(), true);
 			localPointA = m_proxyA.getSupportVertex(axisA);
 			localPointB = m_proxyB.getSupportVertex(axisB);
 			pointA = B2Math.mulX(transformA, localPointA, true);
@@ -284,10 +284,10 @@ class B2SeparationFunction
 		
 		else if(m_type == e_faceA)
 		{
-			normal = B2Math.mulMV(transformA.R, m_axis);
+			normal = B2Math.mulMV(transformA.R, m_axis, true);
 			pointA = B2Math.mulX(transformA, m_localPoint, true);
 			
-			axisB = B2Math.mulTMV(transformB.R, normal.getNegative());
+			axisB = B2Math.mulTMV(transformB.R, normal.getNegativePooled());
 			
 			localPointB = m_proxyB.getSupportVertex(axisB);
 			pointB = B2Math.mulX(transformB, localPointB, true);
@@ -299,10 +299,10 @@ class B2SeparationFunction
 		
 		else if(m_type == e_faceB)
 		{
-			normal = B2Math.mulMV(transformB.R, m_axis);
+			normal = B2Math.mulMV(transformB.R, m_axis, true);
 			pointB = B2Math.mulX(transformB, m_localPoint, true);
 			
-			axisA = B2Math.mulTMV(transformA.R, normal.getNegative());
+			axisA = B2Math.mulTMV(transformA.R, normal.getNegativePooled(), true);
 			
 			localPointA = m_proxyA.getSupportVertex(axisA);
 			pointA = B2Math.mulX(transformA, localPointA, true);

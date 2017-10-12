@@ -123,7 +123,7 @@ public function getSearchDirection():B2Vec2
 		case 2:
 		{
 			var e12:B2Vec2 = B2Math.subtractVVPooled(m_v2.w, m_v1.w);
-			var sgn:Float = B2Math.crossVV(e12, m_v1.w.getNegative());
+			var sgn:Float = B2Math.crossVV(e12, m_v1.w.getNegativePooled());
 			if (sgn > 0.0)
 			{
 				// Origin is left of e12.
