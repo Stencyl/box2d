@@ -180,6 +180,11 @@ class B2Vec2
 
 	public var x:Float;
 	public var y:Float;
+
+	public function toString():String
+	{
+		return "(" + x + ", " + y + ")";
+	}
 	
 	//POOLING
 	public function reset() 
