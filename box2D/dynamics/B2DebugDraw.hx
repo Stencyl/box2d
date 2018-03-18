@@ -182,7 +182,7 @@ class B2DebugDraw
 		
 		m_sprite.graphics.lineStyle(m_lineThickness, color.color, m_alpha);
 		m_sprite.graphics.moveTo(vertices[0].x * m_drawScale, vertices[0].y * m_drawScale);
-		for (i in 1...vertexCount){
+		for (i in 0...vertexCount){
 				m_sprite.graphics.lineTo(vertices[i].x * m_drawScale, vertices[i].y * m_drawScale);
 		}
 		m_sprite.graphics.lineTo(vertices[0].x * m_drawScale, vertices[0].y * m_drawScale);
@@ -197,7 +197,7 @@ class B2DebugDraw
 		m_sprite.graphics.lineStyle(m_lineThickness, color.color, m_alpha);
 		m_sprite.graphics.moveTo(vertices[0].x * m_drawScale, vertices[0].y * m_drawScale);
 		m_sprite.graphics.beginFill(color.color, m_fillAlpha);
-		for (i in 1...vertexCount){
+		for (i in 0...vertexCount){
 				m_sprite.graphics.lineTo(vertices[i].x * m_drawScale, vertices[i].y * m_drawScale);
 		}
 		m_sprite.graphics.lineTo(vertices[0].x * m_drawScale, vertices[0].y * m_drawScale);
