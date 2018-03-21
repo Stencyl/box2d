@@ -52,10 +52,10 @@ class B2ContactListener
 	 */
 	public function beginContact(contact:B2Contact):Void 
 	{
-		//5000 seems reasonable time to reset
-		if (KEY_LOCK > 5000)
+		//smallest common max size
+		if (KEY_LOCK > 2147483647)
 		{
-			KEY_LOCK = 0;
+			KEY_LOCK = -2147483648;
 		}
 		
 		contact.key = KEY_LOCK++;
