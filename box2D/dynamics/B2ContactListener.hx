@@ -25,6 +25,7 @@ import box2D.dynamics.contacts.B2Contact;
 import com.stencyl.models.Actor;
 import com.stencyl.models.Region;
 import com.stencyl.models.Terrain;
+import com.stencyl.models.actor.Collision;
 
 
 /**
@@ -164,7 +165,10 @@ class B2ContactListener
 	 * get an EndContact callback. However, you may get a BeginContact callback
 	 * the next step.
 	 */
-	public function preSolve(contact:B2Contact, oldManifold:B2Manifold):Void {}
+	public function preSolve(contact:B2Contact, oldManifold:B2Manifold):Void
+	{
+		Collision.preSolve(contact, oldManifold);
+	}
 
 	/**
 	 * This lets you inspect a contact after the solver is finished. This is useful
