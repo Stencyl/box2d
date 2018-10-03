@@ -324,16 +324,16 @@ class B2Math {
 	
 	#if flash
 	
-	public static var MAX_VALUE(get_MAX_VALUE,never):Float;
+	public static var MAX_VALUE(get,never):Float;
 	public static inline function get_MAX_VALUE():Float { return untyped __global__ ["Number"].MAX_VALUE; }
-	public static var MIN_VALUE(get_MIN_VALUE,never):Float;
+	public static var MIN_VALUE(get,never):Float;
 	public static inline function get_MIN_VALUE():Float { return untyped __global__ ["Number"].MIN_VALUE; }
 	
 	#elseif js
 	
-	public static var MAX_VALUE(get_MAX_VALUE,never):Float;
+	public static var MAX_VALUE(get,never):Float;
 	public static inline function get_MAX_VALUE():Float { return untyped __js__ ("Number.MAX_VALUE"); }
-	public static var MIN_VALUE(get_MIN_VALUE,never):Float;
+	public static var MIN_VALUE(get,never):Float;
 	public static inline function get_MIN_VALUE():Float { return untyped __js__ ("Number.MIN_VALUE"); }
 	
 	#else

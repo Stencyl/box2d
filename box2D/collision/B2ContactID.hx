@@ -38,7 +38,7 @@ class B2ContactID
 		return id;
 	}
 	
-	public var key (get_key, set_key):Int;
+	public var key (get, set):Int;
 	
 	private function get_key():Int {
 		return _key;

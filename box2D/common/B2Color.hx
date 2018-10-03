@@ -41,10 +41,10 @@ class B2Color
 		_b = Std.int(255 * B2Math.clamp(bb, 0.0, 1.0));
 	}
 	
-	public var r (null, set_r):Float;
-	public var g (null, set_g):Float;
-	public var b (null, set_b):Float;
-	public var color (get_color, null):Int;
+	public var r (null, set):Float;
+	public var g (null, set):Float;
+	public var b (null, set):Float;
+	public var color (get, null):Int;
 	
 	// R
 	private function set_r(rr:Float) : Float{
