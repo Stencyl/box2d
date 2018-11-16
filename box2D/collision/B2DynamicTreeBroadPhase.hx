@@ -2,20 +2,21 @@
 
 
 import box2D.common.math.B2Vec2;
+import box2D.dynamics.B2ContactManager;
+import box2D.dynamics.B2Fixture;
 
-	
 /**
  * The broad-phase is used for computing pairs and performing volume queries and ray casts.
  * This broad-phase does not persist pairs. Instead, this reports potentially new pairs.
  * It is up to the client to consume the new pairs and to track subsequent overlap.
  */
-class B2DynamicTreeBroadPhase implements IBroadPhase
+class B2DynamicTreeBroadPhase implements IBroadPhase implements B2DynamicTree.QueryCallback
 {
 	/**
 	 * Create a proxy with an initial AABB. Pairs are not reported until
 	 * UpdatePairs is called.
 	 */
-	public function createProxy(aabb:B2AABB, userData:Dynamic):Dynamic
+	public function createProxy(aabb:B2AABB, userData:B2Fixture):B2DynamicTreeNode
 	{
 		var proxy:B2DynamicTreeNode = m_tree.createProxy(aabb, userData);
 		++m_proxyCount;
@@ -26,7 +27,7 @@ class B2DynamicTreeBroadPhase implements IBroadPhase
 	/**
 	 * Destroy a proxy. It is up to the client to remove any pairs.
 	 */
-	public function destroyProxy(proxy:Dynamic):Void
+	public function destroyProxy(proxy:B2DynamicTreeNode):Void
 	{
 		unBufferMove(proxy);
 		--m_proxyCount;
@@ -37,7 +38,7 @@ class B2DynamicTreeBroadPhase implements IBroadPhase
 	 * Call MoveProxy as many times as you like, then when you are done
 	 * call UpdatePairs to finalized the proxy pairs (for your time step).
 	 */
-	public function moveProxy(proxy:Dynamic, aabb:B2AABB, displacement:B2Vec2):Void
+	public function moveProxy(proxy:B2DynamicTreeNode, aabb:B2AABB, displacement:B2Vec2):Void
 	{
 		var buffer:Bool = m_tree.moveProxy(proxy, aabb, displacement);
 		if (buffer)
@@ -46,7 +47,7 @@ class B2DynamicTreeBroadPhase implements IBroadPhase
 		}
 	}
 	
-	public function testOverlap(proxyA:Dynamic, proxyB:Dynamic):Bool
+	public function testOverlap(proxyA:B2DynamicTreeNode, proxyB:B2DynamicTreeNode):Bool
 	{
 		var aabbA:B2AABB = m_tree.getFatAABB(proxyA);
 		var aabbB:B2AABB = m_tree.getFatAABB(proxyB);
@@ -56,7 +57,7 @@ class B2DynamicTreeBroadPhase implements IBroadPhase
 	/**
 	 * Get user data from a proxy. Returns null if the proxy is invalid.
 	 */
-	public function getUserData(proxy:Dynamic):Dynamic
+	public function getUserData(proxy:B2DynamicTreeNode):B2Fixture
 	{
 		return m_tree.getUserData(proxy);
 	}
@@ -64,7 +65,7 @@ class B2DynamicTreeBroadPhase implements IBroadPhase
 	/**
 	 * Get the AABB for a proxy.
 	 */
-	public function getFatAABB(proxy:Dynamic):B2AABB
+	public function getFatAABB(proxy:B2DynamicTreeNode):B2AABB
 	{
 		return m_tree.getFatAABB(proxy);
 	}
@@ -80,51 +81,24 @@ class B2DynamicTreeBroadPhase implements IBroadPhase
 	/**
 	 * Update the pairs. This results in pair callbacks. This can only add pairs.
 	 */
-	public function updatePairs(callbackMethod:Dynamic):Void
+	public function updatePairs(manager:B2ContactManager):Void
 	{
 		m_pairCount = 0;
 		// Perform tree queries for all moving queries
 		for (queryProxy in m_moveBuffer)
 		{
-			function queryCallback(proxy:B2DynamicTreeNode):Bool
-			{
-				// A proxy cannot form a pair with itself.
-				if (proxy == queryProxy)
-					return true;
-					
-				// Grow the pair buffer as needed
-				if (m_pairCount == m_pairBuffer.length)
-				{
-					m_pairBuffer[m_pairCount] = new B2DynamicTreePair();
-				}
-				
-				var pair:B2DynamicTreePair = m_pairBuffer[m_pairCount];
-				
-				if (proxy.id < queryProxy.id) {
-					
-					pair.proxyA = proxy;
-					pair.proxyB = queryProxy;
-					
-				} else {
-					
-					pair.proxyA = queryProxy;
-					pair.proxyB = proxy;
-					
-				}
-				//pair.proxyA = proxy < queryProxy?proxy:queryProxy;
-				//pair.proxyB = proxy >= queryProxy?proxy:queryProxy;
-				++m_pairCount;
-				
-				return true;
-			}
+			cur_queryProxy = queryProxy;
 			// We have to query the tree with the fat AABB so that
 			// we don't fail to create a pair that may touch later.
 			var fatAABB:B2AABB = m_tree.getFatAABB(queryProxy);
-			m_tree.query(queryCallback, fatAABB);
+			m_tree.query(this, fatAABB);
 		}
+		cur_queryProxy = null;
 		
 		// Reset move buffer
-		m_moveBuffer = new Array <B2DynamicTreeNode> ();
+		var i = m_moveBuffer.length;
+		while(--i >= 0) m_moveBuffer.pop();
+		//m_moveBuffer = new Array <B2DynamicTreeNode> ();
 		//m_moveBuffer.length = 0;
 		
 		// Sort the pair buffer to expose duplicates.
@@ -134,7 +108,7 @@ class B2DynamicTreeBroadPhase implements IBroadPhase
 		// Send the pair buffer
 		//for (i in 0...m_pairCount)
 		var pairing = true;
-		var i = 0;
+		i = 0;
 		while (pairing)
 		{
 			if (i >= m_pairCount) {
@@ -144,9 +118,7 @@ class B2DynamicTreeBroadPhase implements IBroadPhase
 			} else {
 				
 				var primaryPair:B2DynamicTreePair = m_pairBuffer[i];
-				var userDataA:Dynamic = m_tree.getUserData(primaryPair.proxyA);
-				var userDataB:Dynamic = m_tree.getUserData(primaryPair.proxyB);
-				callbackMethod(userDataA, userDataB);
+				manager.addPair(m_tree.getUserData(primaryPair.proxyA), m_tree.getUserData(primaryPair.proxyB));
 				++i;
 				
 				// Skip any duplicate pairs
@@ -164,10 +136,42 @@ class B2DynamicTreeBroadPhase implements IBroadPhase
 		}
 	}
 	
+	public function queryCallback(proxy:B2DynamicTreeNode):Bool
+	{
+		// A proxy cannot form a pair with itself.
+		if (proxy == cur_queryProxy)
+			return true;
+			
+		// Grow the pair buffer as needed
+		if (m_pairCount == m_pairBuffer.length)
+		{
+			m_pairBuffer[m_pairCount] = new B2DynamicTreePair();
+		}
+		
+		var pair:B2DynamicTreePair = m_pairBuffer[m_pairCount];
+		
+		if (proxy.id < cur_queryProxy.id) {
+			
+			pair.proxyA = proxy;
+			pair.proxyB = cur_queryProxy;
+			
+		} else {
+			
+			pair.proxyA = cur_queryProxy;
+			pair.proxyB = proxy;
+			
+		}
+		//pair.proxyA = proxy < cur_queryProxy?proxy:cur_queryProxy;
+		//pair.proxyB = proxy >= cur_queryProxy?proxy:cur_queryProxy;
+		++m_pairCount;
+		
+		return true;
+	}
+	
 	/**
 	 * @inheritDoc
 	 */
-	public function query(callbackMethod:Dynamic -> Bool, aabb:B2AABB):Void
+	public function query(callbackMethod:B2DynamicTree.QueryCallback, aabb:B2AABB):Void
 	{
 		m_tree.query(callbackMethod, aabb);
 	}
@@ -228,4 +232,6 @@ class B2DynamicTreeBroadPhase implements IBroadPhase
 	
 	private var m_pairBuffer:Array <B2DynamicTreePair>;
 	private var m_pairCount:Int;
+	
+	private var cur_queryProxy:B2DynamicTreeNode;
 }

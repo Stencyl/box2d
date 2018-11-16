@@ -21,6 +21,7 @@ package box2D.dynamics;
 
 import box2D.common.math.B2Vec2;
 
+import com.stencyl.models.Actor;
 
 /**
 * A body definition holds all the data needed to construct a rigid body.
@@ -130,7 +131,7 @@ class B2BodyDef
 	/**
 	 * Use this to store application specific body data.
 	 */
-	public var userData:Dynamic;
+	public var userData:Actor;
 	
 	/**
 	 * Scales the inertia tensor.

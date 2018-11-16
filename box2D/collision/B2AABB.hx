@@ -212,6 +212,22 @@ class B2AABB
 		upperBound.y = Math.max(aabb1.upperBound.y, aabb2.upperBound.y);
 	}
 	
+	public function reset()
+	{
+		lowerBound.x = 0;
+		lowerBound.y = 0;
+		upperBound.x = 0;
+		upperBound.y = 0;
+	}
+	
+	public function setTo(other:B2AABB)
+	{
+		lowerBound.x = other.lowerBound.x;
+		lowerBound.y = other.lowerBound.y;
+		upperBound.x = other.upperBound.x;
+		upperBound.y = other.upperBound.y;
+	}
+	
 	public function new () {
 		
 		lowerBound = new B2Vec2();

@@ -18,6 +18,8 @@
 
 package box2D.collision;
 
+import box2D.dynamics.B2Fixture;
+
 	
 /**
  * A node in the dynamic tree. The client does not interact with this directly.
@@ -39,7 +41,7 @@ class B2DynamicTreeNode
 		return child1 == null;
 	}
 	
-	public var userData:Dynamic;
+	public var userData:B2Fixture;
 	public var aabb:B2AABB;
 	public var parent:B2DynamicTreeNode;
 	public var child1:B2DynamicTreeNode;

@@ -1,6 +1,9 @@
 ﻿package box2D.collision;
 
 import box2D.common.math.B2Vec2;
+import box2D.dynamics.B2ContactManager;
+import box2D.dynamics.B2Fixture;
+
 /**
  * Interface for objects tracking overlap of many AABBs.
  */
@@ -10,30 +13,30 @@ interface IBroadPhase
 	 * Create a proxy with an initial AABB. Pairs are not reported until
 	 * UpdatePairs is called.
 	 */
-	function createProxy(aabb:B2AABB, userData:Dynamic):Dynamic;
+	function createProxy(aabb:B2AABB, userData:B2Fixture):B2DynamicTreeNode;
 	
 	/**
 	 * Destroy a proxy. It is up to the client to remove any pairs.
 	 */
-	function destroyProxy(proxy:Dynamic):Void;
+	function destroyProxy(proxy:B2DynamicTreeNode):Void;
 	
 	/**
 	 * Call MoveProxy as many times as you like, then when you are done
 	 * call UpdatePairs to finalized the proxy pairs (for your time step).
 	 */
-	function moveProxy(proxy:Dynamic, aabb:B2AABB, displacement:B2Vec2):Void;
+	function moveProxy(proxy:B2DynamicTreeNode, aabb:B2AABB, displacement:B2Vec2):Void;
 	
-	function testOverlap(proxyA:Dynamic, proxyB:Dynamic):Bool;
+	function testOverlap(proxyA:B2DynamicTreeNode, proxyB:B2DynamicTreeNode):Bool;
 	
 	/**
 	 * Get user data from a proxy. Returns null if the proxy is invalid.
 	 */
-	function getUserData(proxy:Dynamic):Dynamic;
+	function getUserData(proxy:B2DynamicTreeNode):B2Fixture;
 	
 	/**
 	 * Get the fat AABB for a proxy.
 	 */
-	function getFatAABB(proxy:Dynamic):B2AABB;
+	function getFatAABB(proxy:B2DynamicTreeNode):B2AABB;
 	
 	/**
 	 * Get the number of proxies.
@@ -43,7 +46,7 @@ interface IBroadPhase
 	/**
 	 * Update the pairs. This results in pair callbacks. This can only add pairs.
 	 */
-	function updatePairs(callbackMethod:Dynamic):Void;
+	function updatePairs(manager:B2ContactManager):Void;
 	
 	/**
 	 * Query an AABB for overlapping proxies. The callback class
@@ -53,7 +56,7 @@ interface IBroadPhase
 	 * @param callback This function should be a function matching signature
 	 * <code>function Callback(proxy:*):Bool</code>
 	 */
-	function query(callbackMethod:Dynamic -> Bool, aabb:B2AABB):Void;
+	function query(callbackMethod:B2DynamicTree.QueryCallback, aabb:B2AABB):Void;
 	
 	/**
 	 * Ray-cast  agains the proxies in the tree. This relies on the callback

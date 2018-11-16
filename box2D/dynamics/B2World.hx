@@ -20,6 +20,8 @@ package box2D.dynamics;
 
 
 import box2D.collision.B2AABB;
+import box2D.collision.B2DynamicTree;
+import box2D.collision.B2DynamicTreeNode;
 import box2D.collision.B2RayCastInput;
 import box2D.collision.B2RayCastOutput;
 import box2D.collision.IBroadPhase;
@@ -42,6 +44,7 @@ import box2D.dynamics.joints.B2Joint;
 import box2D.dynamics.joints.B2JointDef;
 import box2D.dynamics.joints.B2JointEdge;
 import box2D.dynamics.joints.B2PulleyJoint;
+import box2D.dynamics.B2Fixture;
 
 
 /**
@@ -800,12 +803,9 @@ class B2World
 	 */
 	public function queryAABB(callbackMethod:B2Fixture -> Dynamic, aabb:B2AABB):Void
 	{
-		var broadPhase:IBroadPhase = m_contactManager.m_broadPhase;
-		function worldQueryWrapper(proxy:Dynamic):Bool
-		{
-			return callbackMethod(broadPhase.getUserData(proxy));
-		}
-		broadPhase.query(worldQueryWrapper, aabb);
+		aabbQueryCallback.broadPhase = m_contactManager.m_broadPhase;
+		aabbQueryCallback.callbackMethod = callbackMethod;
+		m_contactManager.m_broadPhase.query(aabbQueryCallback, aabb);
 	}
 	/**
 	 * Query the world for all fixtures that precisely overlap the
@@ -817,24 +817,21 @@ class B2World
 	 */
 	public function queryShape(callbackMethod:B2Fixture -> Dynamic, shape:B2Shape, transform:B2Transform = null):Void
 	{
+		shapeQueryCallback.broadPhase = m_contactManager.m_broadPhase;
+		shapeQueryCallback.callbackMethod = callbackMethod;
 		if (transform == null)
 		{
 			transform = new B2Transform();
 			transform.setIdentity();
 		}
-		var broadPhase:IBroadPhase = m_contactManager.m_broadPhase;
-		function worldQueryWrapper(proxy:Dynamic):Bool
-		{
-			var fixture:B2Fixture = cast (broadPhase.getUserData(proxy), B2Fixture);
-			if(B2Shape.testOverlap(shape, transform, fixture.getShape(), fixture.getBody().getTransform()))
-				return callbackMethod(fixture);
-			return true;
-		}
+		shapeQueryCallback.transform = transform;
+		
 		var aabb:B2AABB = new B2AABB();
 		shape.computeAABB(aabb, transform);
-		broadPhase.query(worldQueryWrapper, aabb);
+		shapeQueryCallback.shape = shape;
+		
+		m_contactManager.m_broadPhase.query(shapeQueryCallback, aabb);
 	}
-	
 	/**
 	 * Query the world for all fixtures that contain a point.
 	 * @param callback a user implemented callback class. It should match signature
@@ -844,19 +841,16 @@ class B2World
 	 */
 	public function queryPoint(callbackMethod:B2Fixture -> Dynamic, p:B2Vec2):Void
 	{
-		var broadPhase:IBroadPhase = m_contactManager.m_broadPhase;
-		function worldQueryWrapper(proxy:Dynamic):Bool
-		{
-			var fixture:B2Fixture = cast (broadPhase.getUserData(proxy), B2Fixture);
-			if(fixture.testPoint(p))
-				return callbackMethod(fixture);
-			return true;
-		}
+		pointQueryCallback.broadPhase = m_contactManager.m_broadPhase;
+		pointQueryCallback.callbackMethod = callbackMethod;
+		pointQueryCallback.p = p;
+		
 		// Make a small box.
 		var aabb:B2AABB = new B2AABB();
 		aabb.lowerBound.set(p.x - B2Settings.b2_linearSlop, p.y - B2Settings.b2_linearSlop);
 		aabb.upperBound.set(p.x + B2Settings.b2_linearSlop, p.y + B2Settings.b2_linearSlop);
-		broadPhase.query(worldQueryWrapper, aabb);
+		
+		m_contactManager.m_broadPhase.query(pointQueryCallback, aabb);
 	}
 	
 	/**
@@ -1725,4 +1719,55 @@ class B2World
 	public static var e_newFixture:Int = 0x0001;
 	public static var e_locked:Int = 0x0002;
 	
+	private var aabbQueryCallback = new AABBQueryCallback();
+	private var shapeQueryCallback = new ShapeQueryCallback();
+	private var pointQueryCallback = new PointQueryCallback();
+}
+
+class AABBQueryCallback implements B2DynamicTree.QueryCallback
+{
+	public var broadPhase:IBroadPhase;
+	public var callbackMethod:B2Fixture -> Dynamic;
+	
+	public function new(){}
+	
+	public function queryCallback(proxy:B2DynamicTreeNode):Bool
+	{
+		return callbackMethod(broadPhase.getUserData(proxy));
+	}
+}
+
+class ShapeQueryCallback implements B2DynamicTree.QueryCallback
+{
+	public var broadPhase:IBroadPhase;
+	public var shape:B2Shape;
+	public var transform:B2Transform;
+	public var callbackMethod:B2Fixture -> Dynamic;
+	
+	public function new(){}
+	
+	public function queryCallback(proxy:B2DynamicTreeNode):Bool
+	{
+		var fixture:B2Fixture = broadPhase.getUserData(proxy);
+		if(B2Shape.testOverlap(shape, transform, fixture.getShape(), fixture.getBody().getTransform()))
+			return callbackMethod(fixture);
+		return true;
+	}
+}
+
+class PointQueryCallback implements B2DynamicTree.QueryCallback
+{
+	public var broadPhase:IBroadPhase;
+	public var callbackMethod:B2Fixture -> Dynamic;
+	public var p:B2Vec2;
+	
+	public function new(){}
+	
+	public function queryCallback(proxy:B2DynamicTreeNode):Bool
+	{
+		var fixture:B2Fixture = broadPhase.getUserData(proxy);
+		if(fixture.testPoint(p))
+			return callbackMethod(fixture);
+		return true;
+	}
 }

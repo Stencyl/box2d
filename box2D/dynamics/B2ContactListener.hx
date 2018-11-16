@@ -61,8 +61,8 @@ class B2ContactListener
 		
 		contact.key = KEY_LOCK++;
 
-		var a1 = cast(contact.getFixtureA().getUserData(), Actor);
-		var a2 = cast(contact.getFixtureB().getUserData(), Actor);
+		var a1 = contact.getFixtureA().getUserData();
+		var a2 = contact.getFixtureB().getUserData();
 		
 		var r1 = Std.is(a1, Region);
 		var r2 = Std.is(a2, Region);
@@ -90,8 +90,8 @@ class B2ContactListener
 	 */
 	public function endContact(contact:B2Contact):Void 
 	{ 
-		var a1 = cast(contact.getFixtureA().getUserData(), Actor);
-		var a2 = cast(contact.getFixtureB().getUserData(), Actor);
+		var a1 = contact.getFixtureA().getUserData();
+		var a2 = contact.getFixtureB().getUserData();
 			
 		var r1 = Std.is(a1, Region);
 		var r2 = Std.is(a2, Region);

@@ -31,6 +31,8 @@ import box2D.common.math.B2Vec2;
 import box2D.dynamics.contacts.B2Contact;
 import box2D.dynamics.contacts.B2ContactEdge;
 
+import com.stencyl.models.Actor;
+
 
 /**
  * A fixture is used to attach a shape to a body for collision detection. A fixture
@@ -147,7 +149,7 @@ class B2Fixture
 	 * Get the user data that was assigned in the fixture definition. Use this to
 	 * store your application specific data.
 	 */
-	public function getUserData():Dynamic
+	public function getUserData():Actor
 	{
 		return m_userData;
 	}
@@ -155,7 +157,7 @@ class B2Fixture
 	/**
 	 * Set the user data. Use this to store your application specific data.
 	 */
-	public function SetUserData(data:Dynamic):Void
+	public function SetUserData(data:Actor):Void
 	{
 		m_userData = data;
 	}
@@ -374,7 +376,7 @@ class B2Fixture
 	
 	public var m_isSensor:Bool;
 	
-	public var m_userData:Dynamic;
+	public var m_userData:Actor;
 	
 	//STENCYL
 	public var groupID:Int;

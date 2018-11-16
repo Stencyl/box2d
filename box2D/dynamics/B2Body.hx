@@ -34,6 +34,7 @@ import box2D.dynamics.contacts.B2ContactEdge;
 import box2D.dynamics.controllers.B2ControllerEdge;
 import box2D.dynamics.joints.B2JointEdge;
 
+import com.stencyl.models.Actor;
 
 
 /**
@@ -1150,14 +1151,14 @@ class B2Body
 	/**
 	* Get the user data pointer that was provided in the body definition.
 	*/
-	public function getUserData() : Dynamic{
+	public function getUserData() : Actor{
 		return m_userData;
 	}
 
 	/**
 	* Set the user data. Use this to store your application specific data.
 	*/
-	public function setUserData(data:Dynamic) : Void
+	public function setUserData(data:Actor) : Void
 	{
 		m_userData = data;
 	}
@@ -1468,7 +1469,7 @@ class B2Body
 
 	public var m_sleepTime:Float;
 
-	private var m_userData:Dynamic;
+	private var m_userData:Actor;
 	
 	//STENCYL
 	public var groupID:Int;

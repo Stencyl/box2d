@@ -44,9 +44,7 @@ class B2ContactManager
 
 	// This is a callback from the broadphase when two AABB proxies begin
 	// to overlap. We create a b2Contact to manage the narrow phase.
-	public function addPair(proxyUserDataA:Dynamic, proxyUserDataB:Dynamic):Void {
-		var fixtureA:B2Fixture = cast (proxyUserDataA, B2Fixture);
-		var fixtureB:B2Fixture = cast (proxyUserDataB, B2Fixture);
+	public function addPair(fixtureA:B2Fixture, fixtureB:B2Fixture):Void {
 		
 		var bodyA:B2Body = fixtureA.getBody();
 		var bodyB:B2Body = fixtureB.getBody();
@@ -135,7 +133,7 @@ class B2ContactManager
 
 	public function findNewContacts():Void
 	{
-		m_broadPhase.updatePairs(addPair);
+		m_broadPhase.updatePairs(this);
 	}
 	
 	static private var s_evalCP:B2ContactPoint = new B2ContactPoint ();

@@ -22,6 +22,7 @@ package box2D.collision;
 import box2D.common.B2Settings;
 import box2D.common.math.B2Math;
 import box2D.common.math.B2Vec2;
+import box2D.dynamics.B2Fixture;
 
 // A dynamic AABB tree broad-phase, inspired by Nathanael Presson's btDbvt.
 
@@ -75,7 +76,7 @@ class B2DynamicTree
 	/**
 	 * Create a proxy. Provide a tight fitting AABB and a userData.
 	 */
-	public function createProxy(aabb:B2AABB, userData:Dynamic):B2DynamicTreeNode
+	public function createProxy(aabb:B2AABB, userData:B2Fixture):B2DynamicTreeNode
 	{
 		var node:B2DynamicTreeNode = allocateNode();
 		
@@ -163,10 +164,13 @@ class B2DynamicTree
 	/**
 	 * Get user data from a proxy. Returns null if the proxy is invalid.
 	 */
-	public function getUserData(proxy:B2DynamicTreeNode):Dynamic
+	public function getUserData(proxy:B2DynamicTreeNode):B2Fixture
 	{
 		return proxy.userData;
 	}
+	
+	private var stackQueuePos = 0;
+	private var stackQueue = new Array<Array<B2DynamicTreeNode>>();
 	
 	/**
 	 * Query an AABB for overlapping proxies. The callback
@@ -175,12 +179,13 @@ class B2DynamicTree
 	 * <code>fuction callback(proxy:B2DynamicTreeNode):Bool</code>
 	 * and should return false to trigger premature termination.
 	 */
-	public function query(callbackMethod:B2DynamicTreeNode -> Bool, aabb:B2AABB):Void
+	public function query(callbackMethod:QueryCallback, aabb:B2AABB):Void
 	{
 		if (m_root == null)
 			return;
-			
-		var stack:Array <B2DynamicTreeNode> = new Array <B2DynamicTreeNode>();
+		
+		if(stackQueue[stackQueuePos] == null) stackQueue[stackQueuePos] = new Array<B2DynamicTreeNode>();
+		var stack = stackQueue[stackQueuePos++];
 		
 		var count:Int = 0;
 		stack[count++] = m_root;
@@ -193,9 +198,9 @@ class B2DynamicTree
 			{
 				if (node.isLeaf())
 				{
-					var proceed:Bool = callbackMethod(node);
+					var proceed:Bool = callbackMethod.queryCallback(node);
 					if (!proceed)
-						return;
+						break;
 				}
 				else
 				{
@@ -205,6 +210,12 @@ class B2DynamicTree
 				}
 			}
 		}
+		
+		count = stack.length;
+		while(count-- > 0)
+			stack.pop();
+		
+		--stackQueuePos;
 	}
 
 	/**
@@ -411,6 +422,8 @@ class B2DynamicTree
 		
 	}
 	
+	private var oldAABB:B2AABB = new B2AABB();
+	
 	private function removeLeaf(leaf:B2DynamicTreeNode):Void
 	{
 		if ( leaf == m_root)
@@ -448,9 +461,8 @@ class B2DynamicTree
 			// Adjust the ancestor bounds
 			while (node1 != null)
 			{
-				var oldAABB:B2AABB = node1.aabb;
+				oldAABB.setTo(node1.aabb);
 				//node1.aabb = B2AABB.combine(node1.child1.aabb, node1.child2.aabb);
-				node1.aabb = new B2AABB ();
 				node1.aabb.combine (node1.child1.aabb, node1.child2.aabb);
 				
 				if (oldAABB.contains(node1.aabb))
@@ -474,4 +486,9 @@ class B2DynamicTree
 	private var m_path:Int;
 	
 	private var m_insertionCount:Int;
+}
+
+interface QueryCallback
+{
+	function queryCallback(proxy:B2DynamicTreeNode):Bool;
 }

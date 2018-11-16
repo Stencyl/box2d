@@ -44,7 +44,8 @@ class B2DistanceProxy
 			case B2Shape.e_circleShape:
 			{
 				var circle:B2CircleShape = cast (shape, B2CircleShape);
-				m_vertices = new Array <B2Vec2> ();
+				m_vertices = m_internalVertices;
+				while(m_vertices.length > 1) m_vertices.pop();
 				m_vertices[0] = circle.m_p;
 				m_count = 1;
 				m_radius = circle.m_radius;
@@ -61,7 +62,8 @@ class B2DistanceProxy
 			case B2Shape.e_edgeShape:
 			{
 				var edge:B2EdgeShape = cast (shape, B2EdgeShape);
-				m_vertices = new Array <B2Vec2> ();
+				m_vertices = m_internalVertices;
+				while(m_vertices.length > 2) m_vertices.pop();
 				m_vertices[0] = edge.m_v1;
 				m_vertices[1] = edge.m_v2;
 				m_count = 2;
@@ -130,10 +132,11 @@ class B2DistanceProxy
 	
 	public function new () {
 		
-		m_vertices = new Array <B2Vec2> ();
+		m_internalVertices = new Array <B2Vec2> ();
 		
 	}
 	
+	private var m_internalVertices:Array <B2Vec2>;
 	public var m_vertices:Array <B2Vec2>;
 	public var m_count:Int;
 	public var m_radius:Float;
