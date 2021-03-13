@@ -83,7 +83,7 @@ class B2PolyAndEdgeContact extends B2Contact
 	public override function reset(fixtureA:B2Fixture = null, fixtureB:B2Fixture = null):Void
 	{
 		//Has to be in reverse
-		if (Std.is(fixtureA.getShape(), B2PolygonShape))
+		if (Std.isOfType(fixtureA.getShape(), B2PolygonShape))
 		{
 			super.reset(fixtureB, fixtureA);
 			

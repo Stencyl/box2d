@@ -64,17 +64,17 @@ class B2ContactListener
 		var a1 = contact.getFixtureA().getUserData();
 		var a2 = contact.getFixtureB().getUserData();
 		
-		var r1 = Std.is(a1, Region);
-		var r2 = Std.is(a2, Region);
+		var r1 = Std.isOfType(a1, Region);
+		var r2 = Std.isOfType(a2, Region);
 		
-		if(r1 && !(r2 || Std.is(a2, Terrain)))
+		if(r1 && !(r2 || Std.isOfType(a2, Terrain)))
 		{
 			cast(a1, Region).addActor(a2);
 			a2.addRegionContact(contact);
 			return;
 		}
 		
-		if(r2 && !(r1 || Std.is(a1, Terrain)))
+		if(r2 && !(r1 || Std.isOfType(a1, Terrain)))
 		{
 			cast(a2, Region).addActor(a1);
 			a1.addRegionContact(contact);
@@ -93,8 +93,8 @@ class B2ContactListener
 		var a1 = contact.getFixtureA().getUserData();
 		var a2 = contact.getFixtureB().getUserData();
 			
-		var r1 = Std.is(a1, Region);
-		var r2 = Std.is(a2, Region);
+		var r1 = Std.isOfType(a1, Region);
+		var r2 = Std.isOfType(a2, Region);
 			
 		if(r1 && !r2)
 		{
@@ -104,13 +104,13 @@ class B2ContactListener
 			
 			for(p in a2.regionContacts)
 			{
-				if(Std.is(p.getFixtureA().getUserData(), Region) && p.getFixtureA().getUserData() == a1)
+				if(Std.isOfType(p.getFixtureA().getUserData(), Region) && p.getFixtureA().getUserData() == a1)
 				{
 					inRegion = true;
 					break;
 				}
 				
-				if(Std.is(p.getFixtureB().getUserData(), Region) && p.getFixtureB().getUserData() == a1)
+				if(Std.isOfType(p.getFixtureB().getUserData(), Region) && p.getFixtureB().getUserData() == a1)
 				{
 					inRegion = true;
 					break;
@@ -130,13 +130,13 @@ class B2ContactListener
 			
 			for(p in a1.regionContacts)
 			{
-				if(Std.is(p.getFixtureA().getUserData(), Region) && p.getFixtureA().getUserData() == a2)
+				if(Std.isOfType(p.getFixtureA().getUserData(), Region) && p.getFixtureA().getUserData() == a2)
 				{
 					inRegion = true;
 					break;
 				}
 				
-				if(Std.is(p.getFixtureB().getUserData(), Region) && p.getFixtureB().getUserData() == a2)
+				if(Std.isOfType(p.getFixtureB().getUserData(), Region) && p.getFixtureB().getUserData() == a2)
 				{
 					inRegion = true;
 					break;
