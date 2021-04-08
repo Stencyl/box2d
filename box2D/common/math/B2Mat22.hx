@@ -86,6 +86,15 @@ class B2Mat22
 			col1.y * v.x + col2.y * v.y
 		);
 	}
+
+	public function multiplyVInPlace(v:B2Vec2)
+	{
+		v.set
+		(
+			col1.x * v.x + col2.x * v.y, 
+			col1.y * v.x + col2.y * v.y
+		);
+	}	
 	
 	public function setIdentity() : Void
 	{

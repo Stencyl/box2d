@@ -42,10 +42,10 @@ class B2SeparationFunction
 		var count:Int = cache.count;
 		B2Settings.b2Assert(0 < count && count < 3);
 		
-		var localPointA:B2Vec2 = new B2Vec2 ();
+		var localPointA:B2Vec2;
 		var localPointA1:B2Vec2;
 		var localPointA2:B2Vec2;
-		var localPointB:B2Vec2 = new B2Vec2 ();
+		var localPointB:B2Vec2;
 		var localPointB1:B2Vec2;
 		var localPointB2:B2Vec2;
 		var pointAX:Float;
@@ -88,7 +88,7 @@ class B2SeparationFunction
 			localPointB = m_proxyB.getVertex(cache.indexB[0]);
 			m_localPoint.x = 0.5 * (localPointA1.x + localPointA2.x);
 			m_localPoint.y = 0.5 * (localPointA1.y + localPointA2.y);
-			m_axis = B2Math.crossVF(B2Math.subtractVV(localPointA2, localPointA1), 1.0);
+			m_axis.setV(B2Math.crossVF(B2Math.subtractVVPooled(localPointA2, localPointA1), 1.0, true));
 			m_axis.normalize();
 			
 			//normal = b2Math.b2MulMV(transformA.R, m_axis);
@@ -123,7 +123,7 @@ class B2SeparationFunction
 			localPointA = m_proxyA.getVertex(cache.indexA[0]);
 			m_localPoint.x = 0.5 * (localPointB1.x + localPointB2.x);
 			m_localPoint.y = 0.5 * (localPointB1.y + localPointB2.y);
-			m_axis = B2Math.crossVF(B2Math.subtractVV(localPointB2, localPointB1), 1.0);
+			m_axis.setV(B2Math.crossVF(B2Math.subtractVVPooled(localPointB2, localPointB1), 1.0, true));
 			m_axis.normalize();
 			
 			//normal = b2Math.b2MulMV(transformB.R, m_axis);
@@ -158,9 +158,9 @@ class B2SeparationFunction
 			localPointB1 = m_proxyB.getVertex(cache.indexB[0]);
 			localPointB2 = m_proxyB.getVertex(cache.indexB[1]);
 			
-			var pA:B2Vec2 = B2Math.mulX(transformA, localPointA, true);
+			var pA:B2Vec2 = transformA.position; //B2Math.mulX(transformA, localPointA, true);
 			var dA:B2Vec2 = B2Math.mulMV(transformA.R, B2Math.subtractVVPooled(localPointA2, localPointA1), true);
-			var pB:B2Vec2 = B2Math.mulX(transformB, localPointB, true);
+			var pB:B2Vec2 = transformB.position; //B2Math.mulX(transformB, localPointB, true);
 			var dB:B2Vec2 = B2Math.mulMV(transformB.R, B2Math.subtractVVPooled(localPointB2, localPointB1), true);
 			
 			var a:Float = dA.x * dA.x + dA.y * dA.y;
@@ -186,21 +186,21 @@ class B2SeparationFunction
 			}
 			
 			//b2Vec2 localPointA = localPointA1 + s * (localPointA2 - localPointA1);
-			localPointA = new B2Vec2();
+			localPointA = B2Vec2.getFromPool();
 			localPointA.x = localPointA1.x + s * (localPointA2.x - localPointA1.x);
 			localPointA.y = localPointA1.y + s * (localPointA2.y - localPointA1.y);
 			//b2Vec2 localPointB = localPointB1 + s * (localPointB2 - localPointB1);
-			localPointB = new B2Vec2();
+			localPointB = B2Vec2.getFromPool();
 			localPointB.x = localPointB1.x + s * (localPointB2.x - localPointB1.x);
 			localPointB.y = localPointB1.y + s * (localPointB2.y - localPointB1.y);
 			
 			if (s == 0.0 || s == 1.0)
 			{
 				m_type = e_faceB;
-				m_axis = B2Math.crossVF(B2Math.subtractVV(localPointB2, localPointB1), 1.0);
+				m_axis.setV(B2Math.crossVF(B2Math.subtractVVPooled(localPointB2, localPointB1), 1.0, true));
 				m_axis.normalize();
                 
-				m_localPoint = localPointB;
+				m_localPoint.setV(localPointB);
 				
 				//normal = b2Math.b2MulMV(transformB.R, m_axis);
 				tVec = m_axis;
@@ -228,9 +228,9 @@ class B2SeparationFunction
 			else
 			{
 				m_type = e_faceA;
-				m_axis = B2Math.crossVF(B2Math.subtractVV(localPointA2, localPointA1), 1.0);
+				m_axis.setV(B2Math.crossVF(B2Math.subtractVVPooled(localPointA2, localPointA1), 1.0, true));
 				
-				m_localPoint = localPointA;
+				m_localPoint.setV(localPointA);
 				
 				//normal = b2Math.b2MulMV(transformA.R, m_axis);
 				tVec = m_axis;
@@ -287,7 +287,7 @@ class B2SeparationFunction
 			normal = B2Math.mulMV(transformA.R, m_axis, true);
 			pointA = B2Math.mulX(transformA, m_localPoint, true);
 			
-			axisB = B2Math.mulTMV(transformB.R, normal.getNegativePooled());
+			axisB = B2Math.mulTMV(transformB.R, normal.getNegativePooled(), true);
 			
 			localPointB = m_proxyB.getSupportVertex(axisB);
 			pointB = B2Math.mulX(transformB, localPointB, true);

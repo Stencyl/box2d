@@ -44,12 +44,11 @@ class B2WorldManifold
 	
 	inline public function reset()
 	{
-		m_normal = new B2Vec2();	
+		m_normal.setZero();
 		
-		m_points = new Array <B2Vec2> ();
 		for (i in 0...B2Settings.b2_maxManifoldPoints)
 		{
-			m_points[i] = new B2Vec2();
+			m_points[i].setZero();
 		}
 	}
 	

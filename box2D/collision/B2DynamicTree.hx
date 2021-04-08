@@ -350,10 +350,12 @@ class B2DynamicTree
 			return;
 		}
 		
-		var center:B2Vec2 = leaf.aabb.getCenter();
+		//var center:B2Vec2 = leaf.aabb.getCenter();
 		var sibling:B2DynamicTreeNode = m_root;
 		if (sibling.isLeaf() == false)
 		{
+			var centerX = (leaf.aabb.lowerBound.x + leaf.aabb.upperBound.x) / 2;
+			var centerY = (leaf.aabb.lowerBound.y + leaf.aabb.upperBound.y) / 2;
 			do
 			{
 				var child1:B2DynamicTreeNode = sibling.child1;
@@ -364,10 +366,10 @@ class B2DynamicTree
 				//float32 norm1 = delta1.x + delta1.y;
 				//float32 norm2 = delta2.x + delta2.y;
 				
-				var norm1:Float = Math.abs((child1.aabb.lowerBound.x + child1.aabb.upperBound.x) / 2 - center.x)
-								 + Math.abs((child1.aabb.lowerBound.y + child1.aabb.upperBound.y) / 2 - center.y);
-				var norm2:Float = Math.abs((child2.aabb.lowerBound.x + child2.aabb.upperBound.x) / 2 - center.x)
-								 + Math.abs((child2.aabb.lowerBound.y + child2.aabb.upperBound.y) / 2 - center.y);
+				var norm1:Float = Math.abs((child1.aabb.lowerBound.x + child1.aabb.upperBound.x) / 2 - centerX)
+								 + Math.abs((child1.aabb.lowerBound.y + child1.aabb.upperBound.y) / 2 - centerY);
+				var norm2:Float = Math.abs((child2.aabb.lowerBound.x + child2.aabb.upperBound.x) / 2 - centerX)
+								 + Math.abs((child2.aabb.lowerBound.y + child2.aabb.upperBound.y) / 2 - centerY);
 								 
 				if (norm1 < norm2)
 				{

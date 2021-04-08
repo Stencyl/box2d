@@ -82,6 +82,12 @@ class B2Transform
 		v2.add(position);
 		return v2;
 	}
+
+	public function multiplyInPlace(v:B2Vec2)
+	{
+		R.multiplyVInPlace(v);
+		v.add(position);
+	}
 	 
 
 	public var position:B2Vec2;
