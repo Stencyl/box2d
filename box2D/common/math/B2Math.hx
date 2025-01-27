@@ -332,9 +332,9 @@ class B2Math {
 	#elseif js
 	
 	public static var MAX_VALUE(get,never):Float;
-	public static inline function get_MAX_VALUE():Float { return js.Syntax.code("Number.MAX_VALUE"); }
+	public static inline function get_MAX_VALUE():Float { return #if haxe4 js.Syntax.code #else untyped __js__ #end ("Number.MAX_VALUE"); }
 	public static var MIN_VALUE(get,never):Float;
-	public static inline function get_MIN_VALUE():Float { return js.Syntax.code("Number.MIN_VALUE"); }
+	public static inline function get_MIN_VALUE():Float { return #if haxe4 js.Syntax.code #else untyped __js__ #end ("Number.MIN_VALUE"); }
 	
 	#else
 	
