@@ -32,6 +32,12 @@ import box2D.common.math.B2Vec2;
 import box2D.dynamics.B2Body;
 import box2D.dynamics.B2Fixture;
 
+#if (haxe_ver >= 4.1)
+import Std.isOfType as isOfType;
+#else
+import Std.is as isOfType;
+#end
+
 class B2PolyAndEdgeContact extends B2Contact
 {
 	static var m_xf:B2Transform = new B2Transform();
@@ -83,7 +89,7 @@ class B2PolyAndEdgeContact extends B2Contact
 	public override function reset(fixtureA:B2Fixture = null, fixtureB:B2Fixture = null):Void
 	{
 		//Has to be in reverse
-		if (Std.isOfType(fixtureA.getShape(), B2PolygonShape))
+		if (isOfType(fixtureA.getShape(), B2PolygonShape))
 		{
 			super.reset(fixtureB, fixtureA);
 			

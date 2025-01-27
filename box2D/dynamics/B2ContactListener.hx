@@ -28,6 +28,12 @@ import com.stencyl.models.Terrain;
 import com.stencyl.models.actor.Collision;
 
 
+#if (haxe_ver >= 4.1)
+import Std.isOfType as isOfType;
+#else
+import Std.is as isOfType;
+#end
+
 /**
  * Implement this class to get contact information. You can use these results for
  * things like sounds and game logic. You can also get contact results by
@@ -64,17 +70,17 @@ class B2ContactListener
 		var a1 = contact.getFixtureA().getUserData();
 		var a2 = contact.getFixtureB().getUserData();
 		
-		var r1 = Std.isOfType(a1, Region);
-		var r2 = Std.isOfType(a2, Region);
+		var r1 = isOfType(a1, Region);
+		var r2 = isOfType(a2, Region);
 		
-		if(r1 && !(r2 || Std.isOfType(a2, Terrain)))
+		if(r1 && !(r2 || isOfType(a2, Terrain)))
 		{
 			cast(a1, Region).addActor(a2);
 			a2.addRegionContact(contact);
 			return;
 		}
 		
-		if(r2 && !(r1 || Std.isOfType(a1, Terrain)))
+		if(r2 && !(r1 || isOfType(a1, Terrain)))
 		{
 			cast(a2, Region).addActor(a1);
 			a1.addRegionContact(contact);
@@ -93,8 +99,8 @@ class B2ContactListener
 		var a1 = contact.getFixtureA().getUserData();
 		var a2 = contact.getFixtureB().getUserData();
 			
-		var r1 = Std.isOfType(a1, Region);
-		var r2 = Std.isOfType(a2, Region);
+		var r1 = isOfType(a1, Region);
+		var r2 = isOfType(a2, Region);
 			
 		if(r1 && !r2)
 		{
@@ -104,13 +110,13 @@ class B2ContactListener
 			
 			for(p in a2.regionContacts)
 			{
-				if(Std.isOfType(p.getFixtureA().getUserData(), Region) && p.getFixtureA().getUserData() == a1)
+				if(isOfType(p.getFixtureA().getUserData(), Region) && p.getFixtureA().getUserData() == a1)
 				{
 					inRegion = true;
 					break;
 				}
 				
-				if(Std.isOfType(p.getFixtureB().getUserData(), Region) && p.getFixtureB().getUserData() == a1)
+				if(isOfType(p.getFixtureB().getUserData(), Region) && p.getFixtureB().getUserData() == a1)
 				{
 					inRegion = true;
 					break;
@@ -130,13 +136,13 @@ class B2ContactListener
 			
 			for(p in a1.regionContacts)
 			{
-				if(Std.isOfType(p.getFixtureA().getUserData(), Region) && p.getFixtureA().getUserData() == a2)
+				if(isOfType(p.getFixtureA().getUserData(), Region) && p.getFixtureA().getUserData() == a2)
 				{
 					inRegion = true;
 					break;
 				}
 				
-				if(Std.isOfType(p.getFixtureB().getUserData(), Region) && p.getFixtureB().getUserData() == a2)
+				if(isOfType(p.getFixtureB().getUserData(), Region) && p.getFixtureB().getUserData() == a2)
 				{
 					inRegion = true;
 					break;

@@ -29,6 +29,12 @@ import box2D.common.math.B2Transform;
 import box2D.common.math.B2Vec2;
 
 
+#if (haxe_ver >= 4.1)
+import Std.isOfType as isOfType;
+#else
+import Std.is as isOfType;
+#end
+
 /**
 * A circle shape.
 * @see b2CircleDef
@@ -45,7 +51,7 @@ class B2CircleShape extends B2Shape
 	override public function set(other:B2Shape):Void 
 	{
 		super.set(other);
-		if (Std.isOfType (other, B2CircleShape))
+		if (isOfType (other, B2CircleShape))
 		{
 			var other2:B2CircleShape = cast (other, B2CircleShape);
 			m_p.setV(other2.m_p);

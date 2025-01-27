@@ -30,6 +30,12 @@ import box2D.common.math.B2Transform;
 import box2D.common.math.B2Vec2;
 
 
+#if (haxe_ver >= 4.1)
+import Std.isOfType as isOfType;
+#else
+import Std.is as isOfType;
+#end
+
 /**
 * Convex polygon. The vertices must be in CCW order for a right-handed
 * coordinate system with the z-axis coming out of the screen.
@@ -48,7 +54,7 @@ class B2PolygonShape extends B2Shape
 	public override function set(other:B2Shape):Void 
 	{
 		super.set(other);
-		if (Std.isOfType (other, B2PolygonShape))
+		if (isOfType (other, B2PolygonShape))
 		{
 			var other2:B2PolygonShape = cast (other, B2PolygonShape);
 			m_centroid.setV(other2.m_centroid);
